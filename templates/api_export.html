@@ -1,0 +1,564 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+    #badgify-root {
+        --bg:#0a0a0f; --surface:#14141b; --surface-2:#1b1b24; --surface-3:#22222d;
+        --border:rgba(255,255,255,0.08); --border-strong:rgba(255,255,255,0.14);
+        --text:#f4f4f6; --muted:#9a9aa7; --muted-2:#6f6f7d;
+        --primary:#6366f1; --green:#22c55e; --mint:#34d399; --danger:#f43f5e; --warning:#f59e0b;
+        --grad:linear-gradient(135deg,#6366f1,#8b5cf6);
+        --radius:16px; --radius-sm:10px;
+        font-family:'Inter',system-ui,sans-serif; color:var(--text);
+        background:
+            radial-gradient(900px 500px at 12% -10%, rgba(99,102,241,0.18), transparent 60%),
+            radial-gradient(800px 520px at 100% 0%, rgba(139,92,246,0.12), transparent 55%),
+            var(--bg);
+        border:1px solid var(--border); border-radius:18px; margin:1rem auto 0; max-width:1080px; padding:0 0 2.5rem; overflow:hidden;
+    }
+    #badgify-root h1,#badgify-root h2,#badgify-root h3,#badgify-root h4 { font-family:'Space Grotesk','Inter',sans-serif; }
+
+    #badgify-root .bdg-head {
+        display:flex; justify-content:space-between; align-items:flex-start; gap:1.5rem; flex-wrap:wrap;
+        padding:2rem 2.25rem 1.75rem; border-bottom:1px solid var(--border);
+        background:linear-gradient(180deg, rgba(99,102,241,0.08), transparent);
+    }
+    #badgify-root .bdg-brand { display:flex; align-items:center; gap:0.6rem; margin-bottom:1rem; }
+    #badgify-root .bdg-logo { width:38px; height:38px; display:grid; place-items:center; overflow:hidden; }
+    #badgify-root .bdg-wordmark { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.15rem; letter-spacing:-0.02em; }
+    #badgify-root .bdg-wordmark .dot { color:var(--green); }
+    #badgify-root .bdg-back { display:inline-flex; align-items:center; gap:0.35rem; text-decoration:none; color:var(--muted); font-size:0.85rem; font-weight:600; margin-bottom:0.9rem; transition:color .15s; }
+    #badgify-root .bdg-back:hover { color:var(--text); text-decoration:none; }
+    #badgify-root .bdg-head h1 { font-size:1.8rem; font-weight:700; letter-spacing:-0.02em; margin:0 0 0.35rem; }
+    #badgify-root .bdg-head p { margin:0; color:var(--muted); font-size:0.95rem; }
+    #badgify-root .bdg-head-actions { display:inline-flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
+    #badgify-root .bdg-site-btn {
+        display:inline-flex; align-items:center; gap:0.35rem; text-decoration:none;
+        font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.8rem; color:var(--text);
+        background:var(--surface-2); border:1px solid var(--border-strong); padding:7px 12px; border-radius:8px;
+        transition:background .15s, border-color .15s, color .15s;
+    }
+    #badgify-root .bdg-site-btn:hover { background:var(--surface-3); border-color:rgba(99,102,241,0.5); color:#fff; text-decoration:none; }
+    #badgify-root .badgify-lang { display:inline-flex; padding:4px; gap:2px; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; }
+    #badgify-root .badgify-lang-btn { border:0; background:transparent; color:var(--muted); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.8rem; padding:6px 14px; border-radius:7px; cursor:pointer; transition:background .15s,color .15s; }
+    #badgify-root .badgify-lang-btn:hover { color:var(--text); }
+    #badgify-root .badgify-lang-btn.active { background:var(--grad); color:#fff; box-shadow:0 4px 14px rgba(99,102,241,0.35); }
+
+    #badgify-root .wrap { padding:1.75rem 2.25rem 0; display:flex; flex-direction:column; gap:1.5rem; }
+    #badgify-root .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+    #badgify-root .card-h {
+        display:flex; align-items:center; justify-content:space-between; gap:0.75rem;
+        padding:1.05rem 1.25rem; border-bottom:1px solid var(--border); background:var(--surface-2);
+        font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1rem;
+    }
+    #badgify-root .card-b { padding:1.25rem; }
+    #badgify-root .sec-title { font-family:'Space Grotesk',sans-serif; font-size:0.78rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); padding-left:0.65rem; margin:0 0 0.7rem; border-left:3px solid var(--primary); }
+
+    #badgify-root label.fld { display:block; font-size:0.85rem; color:var(--text); font-weight:600; margin:0 0 0.4rem; }
+    #badgify-root .inp {
+        width:100%; background:var(--surface-2); border:1px solid var(--border-strong); color:var(--text);
+        border-radius:var(--radius-sm); padding:0.65rem 0.85rem; font-size:0.9rem; font-family:inherit;
+        transition:border-color .15s, box-shadow .15s;
+    }
+    #badgify-root .inp::placeholder { color:var(--muted-2); }
+    #badgify-root .inp:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(99,102,241,0.25); }
+    #badgify-root .hint { color:var(--muted-2); font-size:0.8rem; margin:0.35rem 0 0; }
+
+    #badgify-root .btn {
+        display:inline-flex; align-items:center; justify-content:center; gap:0.45rem; cursor:pointer;
+        font-family:'Inter',sans-serif; font-weight:600; font-size:0.9rem; text-decoration:none;
+        padding:0.62rem 1.1rem; border-radius:var(--radius-sm); border:1px solid transparent; color:#fff;
+        background:#4f46e5; transition:background .15s, transform .08s, border-color .15s, color .15s;
+    }
+    #badgify-root .btn:hover { background:#4338ca; transform:translateY(-1px); color:#fff; text-decoration:none; }
+    #badgify-root .btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+    #badgify-root .btn.ghost { background:transparent; border-color:var(--border-strong); color:var(--text); }
+    #badgify-root .btn.ghost:hover { background:var(--surface-2); border-color:rgba(99,102,241,0.5); }
+    #badgify-root .btn.danger { background:transparent; border-color:rgba(244,63,94,0.4); color:#fda4af; }
+    #badgify-root .btn.danger:hover { background:rgba(244,63,94,0.12); border-color:rgba(244,63,94,0.6); }
+    #badgify-root .btn.sm { padding:0.42rem 0.8rem; font-size:0.82rem; }
+    #badgify-root .btn-row { display:flex; flex-wrap:wrap; gap:0.6rem; }
+
+    #badgify-root .status { display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
+    #badgify-root .dot-state { width:9px; height:9px; border-radius:50%; background:var(--mint); box-shadow:0 0 10px var(--mint); }
+    #badgify-root .ping-info { margin-top:1rem; display:flex; flex-direction:column; gap:0.5rem; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:0.9rem 1rem; }
+    #badgify-root .ping-info .pi-row { display:flex; justify-content:space-between; gap:1rem; font-size:0.85rem; align-items:baseline; }
+    #badgify-root .ping-info .pi-k { color:var(--muted); }
+    #badgify-root .ping-info .pi-v { color:var(--text); font-weight:600; text-align:right; }
+    #badgify-root .ping-info .pi-v.warn { color:#fcd34d; }
+    #badgify-root .kv { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:0.82rem; color:var(--muted); background:var(--surface-2); border:1px solid var(--border); padding:0.2rem 0.5rem; border-radius:7px; }
+
+    #badgify-root .banner { border-radius:var(--radius-sm); padding:0.8rem 1rem; font-size:0.88rem; border:1px solid; display:none; }
+    #badgify-root .banner.show { display:block; }
+    #badgify-root .banner.ok { background:rgba(52,211,153,0.1); border-color:rgba(52,211,153,0.4); color:#a7f3d0; }
+    #badgify-root .banner.err { background:rgba(244,63,94,0.1); border-color:rgba(244,63,94,0.4); color:#fda4af; }
+    #badgify-root .banner.info { background:rgba(99,102,241,0.1); border-color:rgba(99,102,241,0.4); color:#c7c9ff; }
+
+    #badgify-root .sec-note {
+        display:flex; gap:0.6rem; align-items:flex-start; background:var(--surface-2);
+        border:1px solid var(--border); border-left:3px solid var(--warning); border-radius:var(--radius-sm);
+        padding:0.8rem 1rem; color:var(--muted); font-size:0.84rem; margin-top:1rem; line-height:1.5;
+    }
+    #badgify-root .sec-note strong { color:var(--text); }
+
+    #badgify-root .badge-stats { display:flex; flex-wrap:wrap; gap:0.35rem 0.7rem; margin-top:0.2rem; font-size:0.73rem; color:var(--muted); }
+    #badgify-root .badge-stats .bstat b { color:var(--text); font-weight:700; }
+    #badgify-root .ref-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+    #badgify-root .ref-card > summary { list-style:none; cursor:pointer; padding:1.05rem 1.25rem; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.95rem; display:flex; align-items:center; justify-content:space-between; gap:0.75rem; }
+    #badgify-root .ref-card > summary::-webkit-details-marker { display:none; }
+    #badgify-root .ref-card .ref-chev { transition:transform .2s; color:var(--muted); font-size:1.1rem; }
+    #badgify-root .ref-card[open] .ref-chev { transform:rotate(180deg); }
+    #badgify-root .ref-body { padding:0 1.25rem 1.25rem; border-top:1px solid var(--border); }
+    #badgify-root .ref-body .sec-title { margin-top:1.1rem; }
+    #badgify-root .ref-list { list-style:none; padding:0; margin:0.4rem 0 0; display:flex; flex-direction:column; gap:0.45rem; }
+    #badgify-root .ref-list li { font-size:0.85rem; color:var(--muted); }
+    #badgify-root .ref-body code { font-family:ui-monospace,monospace; font-size:0.78rem; background:var(--surface-3); border:1px solid var(--border); border-radius:6px; padding:0.1rem 0.4rem; color:#c7c9ff; margin-right:0.4rem; }
+    #badgify-root .ref-p { font-size:0.85rem; color:var(--muted); line-height:1.5; margin:0.4rem 0 0; }
+    #badgify-root .badge-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:1rem; }
+    #badgify-root .badge-card {
+        background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+        padding:1.1rem; display:flex; flex-direction:column; gap:0.6rem; transition:border-color .15s, transform .15s;
+    }
+    #badgify-root .badge-card:hover { border-color:rgba(99,102,241,0.45); transform:translateY(-2px); }
+    #badgify-root .badge-card img, #badgify-root .badge-card .noimg {
+        width:64px; height:64px; border-radius:12px; object-fit:contain; background:var(--surface-3);
+        border:1px solid var(--border); display:grid; place-items:center; color:var(--muted-2);
+    }
+    #badgify-root .badge-card h4 { margin:0; font-size:0.98rem; font-weight:700; }
+    #badgify-root .badge-card p { margin:0; font-size:0.82rem; color:var(--muted); line-height:1.45; flex:1; }
+    #badgify-root .badge-card .meta { font-size:0.72rem; color:var(--muted-2); font-family:ui-monospace,monospace; word-break:break-all; }
+
+    #badgify-root .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:9999; align-items:center; justify-content:center; padding:1rem; }
+    #badgify-root .modal.show { display:flex; }
+    #badgify-root .modal-box {
+        background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--radius);
+        width:640px; max-width:100%; max-height:86vh; display:flex; flex-direction:column;
+        box-shadow:0 24px 70px rgba(0,0,0,0.6);
+    }
+    #badgify-root .modal-h { display:flex; align-items:center; justify-content:space-between; padding:1.1rem 1.25rem; border-bottom:1px solid var(--border); }
+    #badgify-root .modal-h h3 { margin:0; font-size:1.1rem; font-weight:700; }
+    #badgify-root .modal-x { background:none; border:0; color:var(--muted); font-size:1.5rem; line-height:1; cursor:pointer; }
+    #badgify-root .modal-c { padding:1.25rem; overflow-y:auto; }
+    #badgify-root .modal-f { padding:1rem 1.25rem; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:0.75rem; flex-wrap:wrap; }
+
+    #badgify-root .user-list { border:1px solid var(--border); border-radius:var(--radius-sm); max-height:300px; overflow-y:auto; background:var(--surface-2); margin-top:0.6rem; }
+    #badgify-root .user-row { display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.8rem; border-bottom:1px solid var(--border); font-size:0.86rem; cursor:pointer; }
+    #badgify-root .user-row:last-child { border-bottom:0; }
+    #badgify-root .user-row .u-mail { color:var(--muted); font-size:0.8rem; margin-left:auto; }
+    #badgify-root .chk { appearance:none; width:17px; height:17px; flex:0 0 17px; border:1px solid var(--border-strong); border-radius:5px; background:var(--surface-3); cursor:pointer; position:relative; }
+    #badgify-root .chk:checked { background:var(--primary); border-color:var(--primary); }
+    #badgify-root .chk:checked::after { content:''; position:absolute; left:5px; top:1.5px; width:4px; height:9px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
+    #badgify-root .sel-count { color:var(--muted); font-size:0.85rem; }
+    #badgify-root ::-webkit-scrollbar { width:10px; height:10px; }
+    #badgify-root ::-webkit-scrollbar-thumb { background:var(--surface-3); border-radius:6px; }
+
+    @media (max-width:640px){ #badgify-root .bdg-head,#badgify-root .wrap { padding-left:1.1rem; padding-right:1.1rem; } }
+</style>
+
+<div id="badgify-root">
+    <div class="bdg-head">
+        <div>
+            <a href="/admin/badges_extraction" class="bdg-back" data-i18n="back">&larr; Retour au menu</a>
+            <div class="bdg-brand">
+                <span class="bdg-logo" aria-hidden="true">
+                    <img src="{{ logo_url }}" alt="" style="width:100%;height:100%;object-fit:contain;">
+                </span>
+                <span class="bdg-wordmark">badgify<span class="dot">.</span></span>
+            </div>
+            <h1 data-i18n="title">Export API Badgify</h1>
+            <p data-i18n="sub">Attribuez vos badges automatiquement via l'API Badgify.</p>
+        </div>
+        <div class="bdg-head-actions">
+            <a href="https://badgify.eu/" target="_blank" rel="noopener" class="bdg-site-btn" data-i18n="goto_badgify">Se rendre sur Badgify ↗</a>
+            <div class="badgify-lang" role="group" aria-label="Langue / Language">
+                <button type="button" class="badgify-lang-btn active" data-lang="fr">FR</button>
+                <button type="button" class="badgify-lang-btn" data-lang="en">EN</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="wrap">
+
+        <!-- Connexion / Configuration -->
+        <div class="card">
+            <div class="card-h"><span data-i18n="conn_title">Connexion API</span>
+                <span class="status" id="conn-badge" style="display:none;">
+                    <span class="dot-state"></span><span data-i18n="connected">Configuré</span>
+                </span>
+            </div>
+            <div class="card-b">
+
+                <div id="configured-view" style="display:none;">
+                    <div class="status" style="margin-bottom:1rem;">
+                        <span class="kv" id="cfg-url">—</span>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn" id="btn-test"><span data-i18n="test_api">Tester l'API</span></button>
+                        <button class="btn ghost" id="btn-reconfigure" data-i18n="reconfigure">Reconfigurer</button>
+                        <button class="btn danger" id="btn-delete-cfg" data-i18n="delete_cfg">Supprimer</button>
+                    </div>
+                    <div class="banner" id="test-banner" style="margin-top:1rem;"></div>
+                    <div class="ping-info" id="ping-info" style="display:none;"></div>
+                </div>
+
+                <div id="form-view">
+                    <div style="margin-bottom:1rem;">
+                        <label class="fld" for="in-url" data-i18n="f_url">URL de l'API</label>
+                        <input class="inp" id="in-url" type="text" value="https://badgify.eu/api/v1/public" spellcheck="false">
+                    </div>
+                    <div>
+                        <label class="fld" for="in-token" data-i18n="f_token">Jeton (Bearer)</label>
+                        <input class="inp" id="in-token" type="password" placeholder="bdgk_…" autocomplete="off" spellcheck="false">
+                        <p class="hint" data-i18n="f_token_hint">Le jeton est stocké côté serveur et ne sera plus jamais réaffiché après enregistrement.</p>
+                    </div>
+                    <div class="btn-row" style="margin-top:1.1rem;">
+                        <button class="btn" id="btn-save-cfg" data-i18n="save_cfg">Enregistrer</button>
+                        <button class="btn ghost" id="btn-cancel-cfg" data-i18n="cancel" style="display:none;">Annuler</button>
+                    </div>
+                    <div class="banner" id="cfg-banner" style="margin-top:1rem;"></div>
+
+                    <div class="sec-note">
+                        <span aria-hidden="true">&#128274;</span>
+                        <span data-i18n="sec_note"><strong>Sécurité.</strong> Les appels partent du serveur CTFd (l'IP doit être déclarée côté Badgify). Le jeton n'est jamais exposé au navigateur ni renvoyé par l'API une fois enregistré.</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Référence API (repliée par défaut) -->
+        <details class="ref-card">
+            <summary><span data-i18n="ref_title">Codes de réponse & limites</span><span class="ref-chev" aria-hidden="true">⌄</span></summary>
+            <div class="ref-body">
+                <div class="sec-title" data-i18n="ref_codes">Codes de réponse</div>
+                <ul class="ref-list">
+                    <li><code>401</code><span data-i18n="c401">jeton absent, invalide, expiré ou révoqué</span></li>
+                    <li><code>403</code><span data-i18n="c403">appel depuis une origine non autorisée</span></li>
+                    <li><code>404</code><span data-i18n="c404">badge inexistant ou non exposé</span></li>
+                    <li><code>409</code><span data-i18n="c409">quota mensuel d'emails insuffisant</span></li>
+                    <li><code>422</code><span data-i18n="c422">corps de requête invalide</span></li>
+                    <li><code>429</code><span data-i18n="c429">limite de débit atteinte (voir l'en-tête Retry-After)</span></li>
+                </ul>
+                <div class="sec-title" data-i18n="ref_reasons">Raisons d'échec (errors[].reason)</div>
+                <ul class="ref-list">
+                    <li><code>already_awarded</code><span data-i18n="r_already">badge déjà attribué à cette personne</span></li>
+                    <li><code>duplicate_in_request</code><span data-i18n="r_dup">adresse en double dans la requête</span></li>
+                    <li><code>quota_exceeded</code><span data-i18n="r_quota">quota mensuel épuisé</span></li>
+                    <li><code>email_failed</code><span data-i18n="r_email">l'email n'a pas pu être envoyé</span></li>
+                </ul>
+                <div class="sec-title" data-i18n="ref_limits">Limites</div>
+                <p class="ref-p" data-i18n="limits">60 requêtes par minute et 5000 par jour par jeton ; 30 requêtes d'attribution par heure ; 50 destinataires par requête. Les appels refusés répétés depuis une même IP sont bloqués temporairement.</p>
+            </div>
+        </details>
+
+        <!-- Badges -->
+        <div class="card" id="badges-card" style="display:none;">
+            <div class="card-h"><span data-i18n="badges_title">Badges exposés</span>
+                <button class="btn ghost sm" id="btn-load-badges" data-i18n="reload">Recharger</button>
+            </div>
+            <div class="card-b">
+                <div class="banner info show" id="badges-hint" data-i18n="badges_hint">Cliquez sur « Recharger » pour récupérer vos badges Badgify.</div>
+                <div class="badge-grid" id="badge-grid" style="margin-top:1rem;"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal attribution -->
+<div class="modal" id="award-modal">
+    <div class="modal-box">
+        <div class="modal-h">
+            <h3><span data-i18n="award_title">Attribuer</span> — <span id="award-badge-name">—</span></h3>
+            <button class="modal-x" id="award-close">&times;</button>
+        </div>
+        <div class="modal-c">
+            <div class="sec-title" data-i18n="pick_users">Sélectionner des participants</div>
+            <input class="inp" id="user-search" type="text" placeholder="Rechercher (username / email)…" data-i18n-ph="search_ph">
+            <div style="display:flex; gap:0.6rem; margin-top:0.6rem;">
+                <button class="btn ghost sm" id="btn-select-all" data-i18n="select_all">Tout cocher</button>
+                <button class="btn ghost sm" id="btn-select-none" data-i18n="select_none">Tout décocher</button>
+            </div>
+            <div class="user-list" id="user-list"></div>
+            <div class="banner" id="award-banner" style="margin-top:1rem;"></div>
+        </div>
+        <div class="modal-f">
+            <span class="sel-count"><span id="sel-count">0</span> <span data-i18n="selected">sélectionné(s)</span></span>
+            <button class="btn" id="btn-award" disabled data-i18n="do_award">Attribuer le badge</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var API = '/admin/badges_extraction/api';
+    var root = document.getElementById('badgify-root');
+    var lang = 'fr';
+    try { lang = localStorage.getItem('badgify_lang') || 'fr'; } catch (e) {}
+
+    var I = {
+        fr: {
+            back:"← Retour au menu", title:"Export API Badgify",
+            sub:"Attribuez vos badges automatiquement via l'API Badgify.",
+            goto_badgify:"Se rendre sur Badgify ↗",
+            ref_title:"Codes de réponse & limites", ref_codes:"Codes de réponse",
+            c401:"jeton absent, invalide, expiré ou révoqué", c403:"appel depuis une origine non autorisée",
+            c404:"badge inexistant ou non exposé", c409:"quota mensuel d'emails insuffisant",
+            c422:"corps de requête invalide", c429:"limite de débit atteinte (voir l'en-tête Retry-After)",
+            ref_reasons:"Raisons d'échec (errors[].reason)",
+            r_already:"badge déjà attribué à cette personne", r_dup:"adresse en double dans la requête",
+            r_quota:"quota mensuel épuisé", r_email:"l'email n'a pas pu être envoyé",
+            ref_limits:"Limites",
+            limits:"60 requêtes par minute et 5000 par jour par jeton ; 30 requêtes d'attribution par heure ; 50 destinataires par requête. Les appels refusés répétés depuis une même IP sont bloqués temporairement.",
+            conn_title:"Connexion API", connected:"Configuré",
+            test_api:"Tester l'API", reconfigure:"Reconfigurer", delete_cfg:"Supprimer",
+            f_url:"URL de l'API", f_token:"Jeton (Bearer)",
+            f_token_hint:"Le jeton est stocké côté serveur et ne sera plus jamais réaffiché après enregistrement.",
+            save_cfg:"Enregistrer", cancel:"Annuler",
+            sec_note:"<strong>Sécurité.</strong> Les appels partent du serveur CTFd (l'IP doit être déclarée côté Badgify). Le jeton n'est jamais exposé au navigateur ni renvoyé par l'API une fois enregistré.",
+            badges_title:"Badges exposés", reload:"Recharger",
+            badges_hint:"Cliquez sur « Recharger » pour récupérer vos badges Badgify.",
+            award_title:"Attribuer", pick_users:"Sélectionner des participants",
+            search_ph:"Rechercher (username / email)…", select_all:"Tout cocher", select_none:"Tout décocher",
+            selected:"sélectionné(s)", do_award:"Attribuer le badge",
+            saving:"Enregistrement…", saved:"Configuration enregistrée.", testing:"Test en cours…",
+            loading_badges:"Chargement des badges…", no_badges:"Aucun badge exposé.",
+            awarding:"Attribution en cours…", pick_one:"Sélectionnez au moins un participant.",
+            award_btn:"Attribuer", confirm_delete:"Supprimer la configuration API ? Le jeton sera effacé."
+        },
+        en: {
+            back:"← Back to menu", title:"Badgify API export",
+            sub:"Award your badges automatically through the Badgify API.",
+            goto_badgify:"Go to Badgify ↗",
+            ref_title:"Response codes & limits", ref_codes:"Response codes",
+            c401:"token missing, invalid, expired or revoked", c403:"call from an unauthorized origin",
+            c404:"badge not found or not exposed", c409:"insufficient monthly email quota",
+            c422:"invalid request body", c429:"rate limit reached (see Retry-After header)",
+            ref_reasons:"Failure reasons (errors[].reason)",
+            r_already:"badge already awarded to this person", r_dup:"duplicate address in the request",
+            r_quota:"monthly quota exhausted", r_email:"the email could not be sent",
+            ref_limits:"Limits",
+            limits:"60 requests per minute and 5000 per day per token; 30 award requests per hour; 50 recipients per request. Repeated rejected calls from the same IP are temporarily blocked.",
+            conn_title:"API connection", connected:"Configured",
+            test_api:"Test the API", reconfigure:"Reconfigure", delete_cfg:"Delete",
+            f_url:"API URL", f_token:"Token (Bearer)",
+            f_token_hint:"The token is stored server-side and will never be shown again after saving.",
+            save_cfg:"Save", cancel:"Cancel",
+            sec_note:"<strong>Security.</strong> Calls are made from the CTFd server (its IP must be declared on Badgify). The token is never exposed to the browser nor returned by the API once saved.",
+            badges_title:"Exposed badges", reload:"Reload",
+            badges_hint:"Click “Reload” to fetch your Badgify badges.",
+            award_title:"Award", pick_users:"Select participants",
+            search_ph:"Search (username / email)…", select_all:"Select all", select_none:"Clear",
+            selected:"selected", do_award:"Award the badge",
+            saving:"Saving…", saved:"Configuration saved.", testing:"Testing…",
+            loading_badges:"Loading badges…", no_badges:"No exposed badge.",
+            awarding:"Awarding…", pick_one:"Select at least one participant.",
+            award_btn:"Award", confirm_delete:"Delete the API configuration? The token will be erased."
+        }
+    };
+    function t(k){ return (I[lang] || I.fr)[k]; }
+    function applyI18n(){
+        var d = I[lang] || I.fr;
+        document.querySelectorAll('[data-i18n]').forEach(function(el){ var v=d[el.getAttribute('data-i18n')]; if(v!=null){ if(el.getAttribute('data-i18n')==='sec_note') el.innerHTML=v; else el.textContent=v; } });
+        document.querySelectorAll('[data-i18n-ph]').forEach(function(el){ var v=d[el.getAttribute('data-i18n-ph')]; if(v!=null) el.setAttribute('placeholder', v); });
+        root.querySelectorAll('.badgify-lang-btn').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-lang')===lang); });
+    }
+    root.querySelectorAll('.badgify-lang-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){ lang = btn.getAttribute('data-lang'); try{localStorage.setItem('badgify_lang',lang);}catch(e){} applyI18n(); });
+    });
+
+    var $ = function(id){ return document.getElementById(id); };
+    function banner(el, kind, msg){ el.className = 'banner show ' + kind; el.textContent = msg; }
+    function hide(el){ el.className = 'banner'; }
+    function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
+
+    function csrf(){ try { return window.init.csrfNonce; } catch(e){ return ''; } }
+    async function jpost(path, body){ var r = await fetch(API + path, { method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json','CSRF-Token':csrf()}, body: JSON.stringify(body||{}) }); return r.json(); }
+    async function jget(path){ var r = await fetch(API + path, { credentials:'same-origin' }); return r.json(); }
+    async function jdel(path){ var r = await fetch(API + path, { method:'DELETE', credentials:'same-origin', headers:{'Content-Type':'application/json','CSRF-Token':csrf()} }); return r.json(); }
+
+    function showConfigured(cfg){
+        $('form-view').style.display = 'none';
+        $('configured-view').style.display = 'block';
+        $('conn-badge').style.display = 'inline-flex';
+        $('cfg-url').textContent = cfg.api_url;
+        $('badges-card').style.display = 'block';
+        runTest();
+    }
+    function showForm(isReconfigure){
+        $('configured-view').style.display = 'none';
+        $('form-view').style.display = 'block';
+        $('conn-badge').style.display = 'none';
+        $('btn-cancel-cfg').style.display = isReconfigure ? 'inline-flex' : 'none';
+        $('in-token').value = '';
+        hide($('cfg-banner'));
+    }
+    async function loadConfig(){
+        try { var d = await jget('/badgify/config'); if (d.configured) showConfigured(d); else showForm(false); }
+        catch(e){ showForm(false); }
+    }
+
+    $('btn-save-cfg').addEventListener('click', async function(){
+        var url = $('in-url').value.trim();
+        var token = $('in-token').value.trim();
+        if (!token){ banner($('cfg-banner'),'err', lang==='fr'?'Jeton requis.':'Token required.'); return; }
+        this.disabled = true; banner($('cfg-banner'),'info', t('saving'));
+        try {
+            var d = await jpost('/badgify/config', { token:token, api_url:url });
+            if (d.success){ banner($('cfg-banner'),'ok', t('saved')); showConfigured(d); }
+            else banner($('cfg-banner'),'err', d.error || 'Erreur');
+        } catch(e){ banner($('cfg-banner'),'err', String(e)); }
+        this.disabled = false;
+    });
+    $('btn-reconfigure').addEventListener('click', function(){ showForm(true); });
+    $('btn-cancel-cfg').addEventListener('click', function(){ loadConfig(); });
+    $('btn-delete-cfg').addEventListener('click', async function(){
+        if (!confirm(t('confirm_delete'))) return;
+        await jdel('/badgify/config'); $('badges-card').style.display = 'none'; showForm(false);
+    });
+
+    function fmtDate(s){ if(!s) return s; var d=new Date(s); if(isNaN(d.getTime())) return s; return d.toLocaleDateString(lang==='en'?'en-GB':'fr-FR', {year:'numeric', month:'long', day:'numeric'}); }
+    function renderPing(info){
+        var box = $('ping-info'); if (!box) return;
+        if (!info){ box.style.display='none'; box.innerHTML=''; return; }
+        var fr = (lang !== 'en');
+        var tok = info.token || {};
+        var rows = [];
+        if (info.organization || info.org) rows.push([fr?'Organisation':'Organisation', esc(info.organization || info.org), '']);
+        if (tok.expires_at){
+            var e = fmtDate(tok.expires_at);
+            var days = (tok.expires_in_days != null) ? tok.expires_in_days : null;
+            if (days != null) e += ' (' + days + (fr?' j':' d') + ')';
+            rows.push([fr?'Expiration du jeton':'Token expiry', esc(e), (days != null && days <= 14) ? 'warn' : '']);
+        }
+        var bc = (info.exposed_badges != null) ? info.exposed_badges : (info.badges_count != null ? info.badges_count : null);
+        if (bc != null) rows.push([fr?'Badges exposés':'Exposed badges', esc(String(bc)), '']);
+        var lim = info.limits || {};
+        var lp = [];
+        if (lim.requests_per_minute != null) lp.push(lim.requests_per_minute + '/min');
+        if (lim.requests_per_day != null) lp.push(lim.requests_per_day + (fr?'/jour':'/day'));
+        if (lim.award_requests_per_hour != null) lp.push(lim.award_requests_per_hour + (fr?' attrib./h':' awards/h'));
+        if (lim.recipients_per_request != null) lp.push(lim.recipients_per_request + (fr?' dest./req.':' recip./req'));
+        if (lp.length) rows.push([fr?'Limites':'Limits', esc(lp.join(' \u00b7 ')), '']);
+        if (!rows.length){ box.style.display='none'; return; }
+        box.innerHTML = rows.map(function(r){ return '<div class="pi-row"><span class="pi-k">'+r[0]+'</span><span class="pi-v '+(r[2]||'')+'">'+r[1]+'</span></div>'; }).join('');
+        box.style.display='flex';
+    }
+    async function runTest(btn){
+        if (btn) btn.disabled = true;
+        banner($('test-banner'),'info', t('testing'));
+        try {
+            var d = await jpost('/badgify/test', {});
+            if (d.success){ banner($('test-banner'),'ok', d.message); renderPing(d.info); }
+            else { banner($('test-banner'),'err', d.message || d.error || ('HTTP '+d.status_code)); renderPing(null); }
+        } catch(e){ banner($('test-banner'),'err', String(e)); renderPing(null); }
+        if (btn) btn.disabled = false;
+    }
+    $('btn-test').addEventListener('click', function(){ runTest(this); });
+
+    function pickLang(obj, base){ if(!obj) return ''; return obj[base+'_'+lang] || obj[base] || obj[base+'_fr'] || obj[base+'_en'] || ''; }
+    function renderBadges(badges){
+        var grid = $('badge-grid'); grid.innerHTML = '';
+        if (!badges || !badges.length){ $('badges-hint').className='banner show info'; $('badges-hint').textContent = t('no_badges'); return; }
+        hide($('badges-hint'));
+        badges.forEach(function(b){
+            var id = b.badge_id || b.id || '';
+            var name = pickLang(b,'name') || b.title || 'Badge';
+            var desc = pickLang(b,'description') || '';
+            var img = b.image_url || b.image || b.visual || b.visual_url || '';
+            var card = document.createElement('div'); card.className = 'badge-card';
+            card.innerHTML =
+                (img ? '<img src="'+esc(img)+'" alt="">' : '<span class="noimg">?</span>') +
+                '<h4>'+esc(name)+'</h4>' + '<p>'+esc(desc)+'</p>' + '<div class="badge-stats" data-bid="'+esc(id)+'"></div>' + '<div class="meta">'+esc(id)+'</div>';
+            var btn = document.createElement('a'); btn.className='btn sm'; btn.textContent = t('award_btn');
+            btn.href = '/admin/badges_extraction/award?badge='+encodeURIComponent(id)+'&badge_name='+encodeURIComponent(name)+(img?'&badge_img='+encodeURIComponent(img):'');
+            card.appendChild(btn); grid.appendChild(card);
+        });
+    }
+    async function loadBadges(){
+        $('badges-hint').className='banner show info'; $('badges-hint').textContent = t('loading_badges');
+        try { var d = await jpost('/badgify/badges', {});
+            if (d.success) { renderBadges(d.badges); loadStats(); }
+            else { $('badges-hint').className='banner show err'; $('badges-hint').textContent = d.error || ('HTTP '+d.status_code); }
+        } catch(e){ $('badges-hint').className='banner show err'; $('badges-hint').textContent = String(e); }
+    }
+    function metricsHtml(m){
+        var fr = (lang !== 'en');
+        function row(lbl, val){ return '<span class="bstat"><b>'+(val!=null?val:0)+'</b> '+lbl+'</span>'; }
+        return row(fr?'attribués':'awarded', m.awarded) + row(fr?'récupérés':'claimed', m.claimed) +
+               row(fr?'en attente':'pending', m.pending) + row(fr?'révoqués':'revoked', m.revoked);
+    }
+    async function loadStats(){
+        try {
+            var d = await jpost('/badgify/stats', {});
+            if (!d || !d.success || !d.badges) return;
+            var map = {}; d.badges.forEach(function(b){ map[b.badge_id || b.id] = b; });
+            document.querySelectorAll('#badge-grid .badge-stats').forEach(function(el){
+                var m = map[el.getAttribute('data-bid')];
+                if (m) el.innerHTML = metricsHtml(m);
+            });
+        } catch(e){}
+    }
+    $('btn-load-badges').addEventListener('click', loadBadges);
+
+    var allUsers = [], currentBadge = null;
+    function updateSelCount(){ var n = document.querySelectorAll('#user-list .chk:checked').length; $('sel-count').textContent = n; $('btn-award').disabled = (n===0); }
+    function renderUsers(filter){
+        var box = $('user-list'); box.innerHTML = '';
+        var f = (filter||'').toLowerCase();
+        allUsers.forEach(function(u, idx){
+            if (f && (u.username||'').toLowerCase().indexOf(f)<0 && (u.email||'').toLowerCase().indexOf(f)<0) return;
+            var row = document.createElement('label'); row.className='user-row';
+            row.innerHTML = '<input type="checkbox" class="chk" data-idx="'+idx+'">'+
+                '<span>'+esc(u.username||'')+'</span><span class="u-mail">'+esc(u.email||'')+'</span>';
+            box.appendChild(row);
+        });
+        box.querySelectorAll('.chk').forEach(function(c){ c.addEventListener('change', updateSelCount); });
+        updateSelCount();
+    }
+    async function openAward(badgeId, badgeName){
+        currentBadge = badgeId; $('award-badge-name').textContent = badgeName;
+        hide($('award-banner')); $('user-search').value = '';
+        $('award-modal').classList.add('show');
+        if (!allUsers.length){
+            try { var d = await jget('/users?exclude_admins=true&exclude_hidden=true'); allUsers = (d && d.users) ? d.users : []; } catch(e){ allUsers = []; }
+        }
+        renderUsers('');
+    }
+    $('award-close').addEventListener('click', function(){ $('award-modal').classList.remove('show'); });
+    $('award-modal').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('show'); });
+    $('user-search').addEventListener('input', function(){ renderUsers(this.value); });
+    $('btn-select-all').addEventListener('click', function(){ document.querySelectorAll('#user-list .chk').forEach(function(c){c.checked=true;}); updateSelCount(); });
+    $('btn-select-none').addEventListener('click', function(){ document.querySelectorAll('#user-list .chk').forEach(function(c){c.checked=false;}); updateSelCount(); });
+
+    $('btn-award').addEventListener('click', async function(){
+        var chks = document.querySelectorAll('#user-list .chk:checked');
+        if (!chks.length){ banner($('award-banner'),'err', t('pick_one')); return; }
+        var recipients = [];
+        chks.forEach(function(c){ var u = allUsers[parseInt(c.getAttribute('data-idx'),10)]; if(u && u.email) recipients.push({username:u.username, email:u.email}); });
+        this.disabled = true; banner($('award-banner'),'info', t('awarding'));
+        var awarded=0, failed=0, errors=[];
+        try {
+            for (var i=0;i<recipients.length;i+=50){
+                var chunk = recipients.slice(i,i+50);
+                var d = await jpost('/badgify/award', { badge_id: currentBadge, recipients: chunk });
+                if (d.success && d.result){ awarded+=(d.result.awarded||0); failed+=(d.result.failed||0); if(d.result.errors) errors=errors.concat(d.result.errors); }
+                else { failed += chunk.length; errors.push({reason: d.error || ('HTTP '+d.status_code)}); }
+            }
+            var kind = failed===0 ? 'ok' : (awarded>0 ? 'info' : 'err');
+            var msg = (lang==='fr') ? ('Attribué : '+awarded+' / '+recipients.length+' — Échecs : '+failed)
+                                    : ('Awarded: '+awarded+' / '+recipients.length+' — Failed: '+failed);
+            if (errors.length){ var rs = errors.slice(0,5).map(function(e){return e.reason||'?';}); msg += ' · '+rs.join(', '); }
+            banner($('award-banner'), kind, msg);
+        } catch(e){ banner($('award-banner'),'err', String(e)); }
+        this.disabled = false; updateSelCount();
+    });
+
+    applyI18n();
+    loadConfig();
+})();
+</script>
+
+{% endblock %}

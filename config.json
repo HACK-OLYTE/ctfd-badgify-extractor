@@ -1,0 +1,8 @@
+{
+  "name": "Badgify - Data Extraction",
+  "route": "/admin/badges_extraction",
+  "version": "1.0.0",
+  "description": "Plugin permettant d'extraire les données des utilisateurs (emails et usernames) dans un format structuré adapté à la plateforme Badgify",
+  "author": "Association Hack'olyte"
+  
+}

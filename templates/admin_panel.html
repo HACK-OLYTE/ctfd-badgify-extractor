@@ -1,0 +1,2354 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+    /* ===================================================================
+       Badgify DA — scopée sous #badgify-root pour ne pas toucher
+       au header / navbar CTFd admin (qui reste classique).
+       Palette & typo inspirées de https://badgify.eu/
+       =================================================================== */
+    #badgify-root {
+        --bg: #0a0a0f;
+        --surface: #14141b;
+        --surface-2: #1b1b24;
+        --surface-3: #22222d;
+        --border: rgba(255,255,255,0.08);
+        --border-strong: rgba(255,255,255,0.14);
+        --text: #f4f4f6;
+        --muted: #9a9aa7;
+        --muted-2: #6f6f7d;
+        --primary: #6366f1;
+        --primary-600: #4f46e5;
+        --violet: #8b5cf6;
+        --green: #22c55e;
+        --mint: #34d399;
+        --info: #38bdf8;
+        --warning: #f59e0b;
+        --danger: #f43f5e;
+        --grad: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        --radius: 14px;
+        --radius-sm: 10px;
+
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--text);
+        background:
+            radial-gradient(900px 500px at 12% -10%, rgba(99,102,241,0.18), transparent 60%),
+            radial-gradient(800px 500px at 100% 0%, rgba(139,92,246,0.12), transparent 55%),
+            var(--bg);
+        border-radius: 18px;
+        padding: 0 0 2rem;
+        margin: 1rem auto 0;
+        max-width: 1180px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+
+    #badgify-root h1, #badgify-root h2, #badgify-root h3,
+    #badgify-root h4, #badgify-root h5 {
+        font-family: 'Space Grotesk', 'Inter', sans-serif;
+        color: var(--text);
+    }
+
+    /* ---------- Header ---------- */
+    #badgify-root .modern-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        padding: 2rem 2.25rem 1.75rem;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(180deg, rgba(99,102,241,0.08), transparent);
+    }
+    #badgify-root .bdg-brand {
+        display: flex; align-items: center; gap: 0.6rem;
+        margin-bottom: 1rem;
+    }
+    #badgify-root .bdg-logo {
+        width: 38px; height: 38px; display: grid; place-items: center; overflow: hidden;
+    }
+    #badgify-root .bdg-wordmark {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 700; font-size: 1.15rem; letter-spacing: -0.02em;
+    }
+    #badgify-root .bdg-wordmark .dot { color: var(--green); }
+    #badgify-root .modern-header h1 {
+        font-size: 1.9rem; font-weight: 700; letter-spacing: -0.02em;
+        margin: 0 0 0.35rem;
+    }
+    #badgify-root .modern-header p {
+        margin: 0; color: var(--muted); font-size: 0.95rem;
+    }
+    #badgify-root .bdg-eyebrow {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--muted-2); display: flex; align-items: center; gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    #badgify-root .bdg-eyebrow::before {
+        content: ''; width: 7px; height: 7px; border-radius: 50%;
+        background: var(--green); box-shadow: 0 0 10px var(--green);
+    }
+
+    #badgify-root .bdg-back {
+        display: inline-flex; align-items: center; gap: 0.35rem; text-decoration: none;
+        color: var(--muted); font-size: 0.85rem; font-weight: 600; margin-bottom: 0.9rem; transition: color .15s;
+    }
+    #badgify-root .bdg-back:hover { color: var(--text); text-decoration: none; }
+
+    /* ---------- Switch de langue FR / EN ---------- */
+    #badgify-root .bdg-head-actions { display:inline-flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
+    #badgify-root .bdg-site-btn {
+        display:inline-flex; align-items:center; gap:0.35rem; text-decoration:none;
+        font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.8rem; color:var(--text);
+        background:var(--surface-2); border:1px solid var(--border-strong); padding:7px 12px; border-radius:8px;
+        transition:background .15s, border-color .15s, color .15s;
+    }
+    #badgify-root .bdg-site-btn:hover { background:var(--surface-3); border-color:rgba(99,102,241,0.5); color:#fff; text-decoration:none; }
+    #badgify-root .badgify-lang {
+        display: inline-flex; padding: 4px; gap: 2px;
+        background: var(--surface-2); border: 1px solid var(--border);
+        border-radius: 10px;
+    }
+    #badgify-root .badgify-lang-btn {
+        border: 0; background: transparent; color: var(--muted);
+        font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+        font-size: 0.8rem; letter-spacing: 0.03em;
+        padding: 6px 14px; border-radius: 7px; cursor: pointer;
+        transition: background .15s, color .15s;
+    }
+    #badgify-root .badgify-lang-btn:hover { color: var(--text); }
+    #badgify-root .badgify-lang-btn.active {
+        background: var(--grad); color: #fff;
+        box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+    }
+
+    /* ---------- Layout ---------- */
+    #badgify-root .container,
+    #badgify-root .container-fluid { padding: 1.75rem 2.25rem 0; max-width: none; }
+    #badgify-root .row { margin: 0 -0.75rem; }
+    #badgify-root [class^="col-"] { padding: 0 0.75rem; }
+
+    /* ---------- Cards ---------- */
+    #badgify-root .modern-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    #badgify-root .sticky-card { display: flex; flex-direction: column; overflow: hidden; }
+    #badgify-root .sticky-card .modern-card-body { overflow-y: auto; flex: 1 1 auto; }
+    #badgify-root .modern-card-header {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 0.75rem;
+        padding: 1.05rem 1.25rem;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600; font-size: 1rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface-2);
+    }
+    #badgify-root .modern-card-body { padding: 1.25rem; }
+
+    /* ---------- Section titles / separators ---------- */
+    #badgify-root .section-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em;
+        text-transform: uppercase; color: var(--muted);
+        padding-left: 0.65rem; margin: 0 0 0.75rem;
+        border-left: 3px solid var(--primary);
+    }
+    #badgify-root .section-separator {
+        height: 1px; background: var(--border); margin: 1.4rem 0;
+    }
+
+    /* ---------- Alerts / stat ---------- */
+    #badgify-root .modern-alert {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--primary);
+        border-radius: var(--radius-sm);
+        padding: 0.9rem 1rem; color: var(--muted);
+        font-size: 0.9rem;
+    }
+    #badgify-root .modern-alert strong { color: var(--text); }
+
+    /* ---------- Badges ---------- */
+    #badgify-root .modern-badge {
+        display: inline-flex; align-items: center; gap: 0.3rem;
+        padding: 0.28rem 0.7rem; border-radius: 999px;
+        font-size: 0.78rem; font-weight: 600;
+        border: 1px solid var(--border-strong);
+        background: var(--surface-3); color: var(--text);
+    }
+    #badgify-root .badge-gradient-primary { background: rgba(99,102,241,0.18); border-color: rgba(99,102,241,0.5); color: #c7c9ff; }
+    #badgify-root .badge-gradient-success { background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.45); color: #86efac; }
+    #badgify-root .badge-gradient-info    { background: rgba(56,189,248,0.15); border-color: rgba(56,189,248,0.45); color: #7dd3fc; }
+    #badgify-root .badge-gradient-warning { background: rgba(245,158,11,0.15); border-color: rgba(245,158,11,0.45); color: #fcd34d; }
+    #badgify-root .badge-gradient-danger  { background: rgba(244,63,94,0.15); border-color: rgba(244,63,94,0.45); color: #fda4af; }
+
+    /* ---------- Inputs / selects ---------- */
+    #badgify-root .modern-input,
+    #badgify-root .modern-select {
+        width: 100%; background: var(--surface-2);
+        border: 1px solid var(--border-strong); color: var(--text);
+        border-radius: var(--radius-sm); padding: 0.6rem 0.8rem;
+        font-size: 0.9rem; font-family: inherit;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    #badgify-root .modern-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239a9aa7' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 0.8rem center;
+        padding-right: 2.2rem;
+    }
+    #badgify-root .modern-input::placeholder { color: var(--muted-2); }
+    #badgify-root .modern-input:focus,
+    #badgify-root .modern-select:focus {
+        outline: none; border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.25);
+    }
+    #badgify-root .modern-select option { background: var(--surface-2); color: var(--text); }
+
+    #badgify-root .modern-input-group { display: flex; gap: 0.5rem; }
+    #badgify-root .modern-input-group .modern-input { flex: 1; }
+    #badgify-root .modern-input-group button {
+        border: 1px solid rgba(99,102,241,0.5); background: rgba(99,102,241,0.18);
+        color: #c7c9ff; border-radius: var(--radius-sm); padding: 0 0.9rem;
+        cursor: pointer; font-weight: 600; transition: background .15s;
+    }
+    #badgify-root .modern-input-group button:hover { background: rgba(99,102,241,0.3); }
+
+    /* ---------- Domain list ---------- */
+    #badgify-root .modern-domain-list {
+        margin-top: 0.75rem; background: var(--surface-2);
+        border: 1px solid var(--border); border-radius: var(--radius-sm);
+        max-height: 180px; overflow-y: auto; color: var(--muted);
+        font-size: 0.85rem;
+    }
+    #badgify-root .modern-domain-list .domain-item {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0.55rem 0.8rem; border-bottom: 1px solid var(--border);
+        color: var(--text);
+    }
+    #badgify-root .modern-domain-list .domain-item:last-child { border-bottom: 0; }
+
+    /* ---------- Checkboxes ---------- */
+    #badgify-root .modern-checkbox-container {
+        display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem;
+    }
+    #badgify-root .modern-checkbox {
+        appearance: none; width: 18px; height: 18px; flex: 0 0 18px;
+        border: 1px solid var(--border-strong); border-radius: 5px;
+        background: var(--surface-2); cursor: pointer; position: relative;
+        transition: background .15s, border-color .15s;
+    }
+    #badgify-root .modern-checkbox:checked { background: var(--primary); border-color: var(--primary); }
+    #badgify-root .modern-checkbox:checked::after {
+        content: ''; position: absolute; left: 5px; top: 1.5px;
+        width: 5px; height: 10px; border: solid #fff;
+        border-width: 0 2px 2px 0; transform: rotate(45deg);
+    }
+    #badgify-root .modern-checkbox-label { color: var(--text); font-size: 0.9rem; cursor: pointer; margin: 0; }
+
+    /* ---------- Buttons ---------- */
+    #badgify-root .modern-btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        gap: 0.45rem; border: 1px solid transparent; cursor: pointer;
+        font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9rem;
+        padding: 0.62rem 1.1rem; border-radius: var(--radius-sm);
+        color: #fff; background: var(--surface-3);
+        transition: transform .08s ease, filter .15s, background .15s;
+    }
+    #badgify-root .modern-btn:hover { transform: translateY(-1px); }
+    #badgify-root .modern-btn:active { transform: translateY(0); }
+    #badgify-root .modern-btn-sm { padding: 0.4rem 0.75rem; font-size: 0.82rem; }
+    #badgify-root .btn-block { display: flex; width: 100%; }
+    #badgify-root .modern-btn-primary { background: #4f46e5; }
+    #badgify-root .modern-btn-primary:hover { background: #4338ca; }
+    #badgify-root .modern-btn-success { background: transparent; border-color: rgba(52,211,153,0.35); color: #6ee7b7; }
+    #badgify-root .modern-btn-success:hover { background: rgba(52,211,153,0.12); border-color: rgba(52,211,153,0.55); }
+    #badgify-root .modern-btn-danger  { background: transparent; border-color: rgba(244,63,94,0.35); color: #fda4af; }
+    #badgify-root .modern-btn-danger:hover  { background: rgba(244,63,94,0.12); border-color: rgba(244,63,94,0.55); }
+    #badgify-root .modern-btn-info    { background: transparent; border-color: rgba(99,102,241,0.35); color: #b4b6ff; }
+    #badgify-root .modern-btn-info:hover    { background: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.55); }
+    #badgify-root .modern-btn-warning { background: transparent; border-color: rgba(245,158,11,0.35); color: #fcd34d; }
+    #badgify-root .modern-btn-warning:hover { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.55); }
+
+    /* ---------- Tabs ---------- */
+    #badgify-root .modern-tabs {
+        display: flex; flex-wrap: wrap; gap: 0.4rem;
+        border-bottom: 1px solid var(--border); padding-bottom: 0.1rem;
+        list-style: none; margin: 0; padding-left: 0;
+    }
+    #badgify-root .modern-tabs .nav-item { margin: 0; }
+    #badgify-root .modern-tabs .nav-link {
+        border: 1px solid transparent; border-radius: 9px 9px 0 0;
+        color: var(--muted); font-size: 0.86rem; font-weight: 600;
+        padding: 0.55rem 0.95rem; cursor: pointer; background: transparent;
+        transition: color .15s, background .15s;
+    }
+    #badgify-root .modern-tabs .nav-link:hover { color: var(--text); background: var(--surface-2); }
+    #badgify-root .modern-tabs .nav-link.active {
+        color: #fff; background: var(--surface-2);
+        border-color: var(--border); border-bottom-color: transparent;
+        box-shadow: inset 0 2px 0 var(--primary);
+    }
+
+    /* ---------- Tables ---------- */
+    #badgify-root .modern-table-container {
+        border: 1px solid var(--border); border-radius: var(--radius-sm);
+        overflow: auto; background: var(--surface);
+    }
+    #badgify-root .modern-table { width: 100%; border-collapse: collapse; color: var(--text); }
+    #badgify-root .modern-table thead th {
+        background: var(--surface-2); color: var(--muted);
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase;
+        text-align: left; padding: 0.7rem 0.9rem;
+        border-bottom: 1px solid var(--border); position: sticky; top: 0;
+    }
+    #badgify-root .modern-table tbody td {
+        padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border);
+        font-size: 0.88rem;
+    }
+    #badgify-root .modern-table tbody tr:last-child td { border-bottom: 0; }
+    #badgify-root .modern-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+    /* ---------- Misc ---------- */
+    #badgify-root small { color: var(--muted-2); }
+    #badgify-root label { color: var(--text); }
+    #badgify-root h5 { color: var(--text) !important; }
+    #badgify-root .text-muted-bdg { color: var(--muted); }
+    #badgify-root ::-webkit-scrollbar { width: 10px; height: 10px; }
+    #badgify-root ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 6px; }
+    #badgify-root ::-webkit-scrollbar-track { background: transparent; }
+
+    @keyframes bdgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    #badgify-root .animate-in { animation: bdgIn .4s ease both; }
+
+    /* ---------- Copy modal ---------- */
+    #badgify-root #copy-modal .bdg-modal {
+        background: var(--surface) !important; color: var(--text);
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius) !important;
+        box-shadow: 0 24px 70px rgba(0,0,0,0.6) !important;
+    }
+    #badgify-root #copy-modal h5 { color: var(--text) !important; }
+    #badgify-root #copy-modal textarea {
+        background: var(--surface-2) !important; color: var(--text) !important;
+        border: 1px solid var(--border-strong) !important;
+    }
+    #badgify-root #copy-modal .bdg-close { color: var(--muted) !important; }
+
+    /* ---------- Pagination (generee par le JS) ---------- */
+    #badgify-root .pagination-container {
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;
+        padding: 0.7rem 0.9rem;
+        background: var(--surface-2); border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+    }
+    #badgify-root .pagination-info { color: var(--muted); font-size: 0.85rem; }
+    #badgify-root .pagination-controls { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+    #badgify-root .pagination-select {
+        background: var(--surface-3); color: var(--text);
+        border: 1px solid var(--border-strong); border-radius: 8px;
+        padding: 0.4rem 1.9rem 0.4rem 0.7rem; font-size: 0.82rem;
+        font-family: inherit; cursor: pointer; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239a9aa7' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 0.6rem center;
+    }
+    #badgify-root .pagination-select:focus {
+        outline: none; border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.25);
+    }
+    #badgify-root .pagination-select option { background: var(--surface-2); color: var(--text); }
+    #badgify-root .pagination-btn {
+        background: var(--surface-3); color: var(--text);
+        border: 1px solid var(--border-strong); border-radius: 8px;
+        padding: 0.4rem 0.7rem; font-size: 0.82rem; font-weight: 600;
+        font-family: inherit; cursor: pointer; white-space: nowrap;
+        transition: background .15s, border-color .15s, color .15s;
+    }
+    #badgify-root .pagination-btn:hover:not(:disabled) {
+        background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5); color: #fff;
+    }
+    #badgify-root .pagination-btn.active {
+        background: var(--grad); border-color: transparent; color: #fff;
+        box-shadow: 0 2px 10px rgba(99,102,241,0.35);
+    }
+    #badgify-root .pagination-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #badgify-root.award-mode [id^="btn-export-"],
+    #badgify-root.award-mode button[onclick^="openCopyModal"] { display: none !important; }
+    #badgify-root .bdg-award-bar {
+        position: fixed; left: 50%; transform: translateX(-50%); bottom: 1.25rem; z-index: 9998;
+        width: min(880px, 94vw); display: flex; align-items: center; justify-content: space-between;
+        gap: 1rem; flex-wrap: wrap; background: rgba(20,20,27,0.97);
+        border: 1px solid rgba(99,102,241,0.5); border-radius: 14px; padding: 0.85rem 1.1rem;
+        box-shadow: 0 18px 50px rgba(0,0,0,0.5);
+    }
+    #badgify-root .bdg-award-bar .aw-info { display:flex; align-items:center; gap:0.55rem; font-size:0.9rem; min-width:0; }
+    #badgify-root .bdg-award-bar .aw-badge-img { width:32px; height:32px; border-radius:8px; object-fit:contain; background:var(--surface-3); border:1px solid var(--border); flex:0 0 auto; }
+    #badgify-root .bdg-award-bar .aw-dot { width:9px; height:9px; border-radius:50%; background:var(--green); box-shadow:0 0 10px var(--green); flex:0 0 auto; }
+    #badgify-root .bdg-award-bar .aw-actions { display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; }
+    #badgify-root .bdg-award-bar .aw-msg { font-size:0.83rem; color:var(--muted); }
+    #badgify-root .bdg-award-bar .aw-msg.ok { color:#86efac; }
+    #badgify-root .bdg-award-bar .aw-msg.err { color:#fda4af; }
+    #badgify-root .bdg-award-bar .aw-msg.info { color:#c7c9ff; }
+
+    @media (max-width: 991px) {
+        #badgify-root .sticky-card { height: auto !important; overflow: visible; }
+        #badgify-root .container-fluid,
+        #badgify-root .container { padding-left: 1.1rem; padding-right: 1.1rem; }
+        #badgify-root .modern-header { padding: 1.5rem 1.25rem; }
+    }
+</style>
+
+<div id="badgify-root" class="badgify{% if award_mode %} award-mode{% endif %}">
+
+<div class="modern-header">
+    <div>
+        <a href="/admin/badges_extraction" class="bdg-back" data-i18n="back_menu">← Retour au menu</a>
+        <div class="bdg-brand">
+            <span class="bdg-logo" aria-hidden="true">
+                <img src="{{ logo_url }}" alt="" style="width:100%;height:100%;object-fit:contain;">
+            </span>
+            <span class="bdg-wordmark">badgify<span class="dot">.</span></span>
+        </div>
+        <div class="bdg-eyebrow" data-i18n="eyebrow">Extraction de données · CTFd</div>
+        <h1>Badges Data Extraction</h1>
+        <p data-i18n="tagline">Plugin utile pour la plateforme Badgify</p>
+    </div>
+    <div class="bdg-head-actions">
+        <a href="https://badgify.eu/" target="_blank" rel="noopener" class="bdg-site-btn" data-i18n="goto_badgify">Se rendre sur Badgify ↗</a>
+        <div class="badgify-lang" role="group" aria-label="Langue / Language">
+            <button type="button" class="badgify-lang-btn active" data-lang="fr">FR</button>
+            <button type="button" class="badgify-lang-btn" data-lang="en">EN</button>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Configuration et filtres -->
+        <div class="col-lg-4">
+            <div class="modern-card sticky-card animate-in">
+                <div class="modern-card-header">
+                    <span data-i18n="config">Configuration</span>
+                </div>
+                <div style="text-align: center; margin-top: 0.9rem; font-size: 0.8rem;" class="text-muted-bdg">
+                    <span data-i18n="autosave">Sauvegarde automatique à chaque changement</span>
+                </div>
+
+                <div class="modern-card-body">
+                    <!-- Stats -->
+                    <div class="modern-alert mb-4">
+                        <strong data-i18n="total_users">Total utilisateurs</strong><br>
+                        <span id="total-users" class="modern-badge badge-gradient-primary mt-2" data-i18n="loading">Chargement...</span>
+                    </div>
+
+                    <!-- Mode CTFd -->
+                    <div class="section-title" data-i18n="mode_title">Mode du CTFd</div>
+                    <small style="display:block; margin-top:-0.3rem; margin-bottom:0.6rem;" data-i18n="mode_help">Détecté automatiquement — modifiable si besoin</small>
+                    <select class="modern-select mb-3" id="mode-select" onchange="updateColumnHeaders(); saveConfig(); refreshCurrentTab()">
+                        <option value="users" data-i18n="mode_users">Utilisateurs (Users)</option>
+                        <option value="teams" data-i18n="mode_teams">Équipes (Teams)</option>
+                    </select>
+
+                    <div class="section-separator"></div>
+
+                    <!-- Domaines exclus -->
+                    <div class="section-title" data-i18n="excluded_domains">Domaines exclus</div>
+                    <div class="modern-input-group">
+                        <input type="text" class="modern-input" id="domain-input" placeholder="exemple.com" data-i18n-ph="domain_ph">
+                        <button id="btn-add-domain" aria-label="add">+</button>
+                    </div>
+                    <div class="modern-domain-list" id="domains-list">
+                        <div style="text-align: center; padding: 1.5rem;" class="text-muted-bdg" data-i18n="no_domain">
+                            Aucun domaine exclu
+                        </div>
+                    </div>
+
+                    <div class="section-separator"></div>
+
+                    <!-- Checkboxes filtres -->
+                    <div class="section-title" data-i18n="filters">Filtrages</div>
+
+                    <div class="modern-checkbox-container">
+                        <input class="modern-checkbox" type="checkbox" id="exclude-admins" onchange="saveConfig(); refreshCurrentTab()">
+                        <label class="modern-checkbox-label" for="exclude-admins" data-i18n="exclude_admins">Exclure les administrateurs</label>
+                    </div>
+
+                    <div class="modern-checkbox-container">
+                        <input class="modern-checkbox" type="checkbox" id="exclude-hidden" onchange="saveConfig(); refreshCurrentTab()">
+                        <label class="modern-checkbox-label" for="exclude-hidden" data-i18n="exclude_hidden">Exclure les comptes cachés (hidden)</label>
+                    </div>
+
+                    <div class="section-separator"></div>
+
+                    <!-- Filtre par challenge -->
+                    <div class="section-title" data-i18n="filter_challenge">Filtre par challenge</div>
+                    <small style="display: block; margin-top: -0.3rem;" data-i18n="filter_challenge_help">
+                        Affichera uniquement les joueurs ayant résolu ce challenge
+                    </small>
+                    <br>
+                    <select class="modern-select mb-3" id="challenge-select" onchange="saveConfig(); refreshCurrentTab()">
+                        <option value="" data-i18n="all_users">— Tous les challenges —</option>
+                    </select>
+
+                    <div class="section-separator"></div>
+
+                    <!-- Colonnes CSV -->
+                    <div class="section-title" data-i18n="csv_columns">Colonnes CSV</div>
+                    <small style="display: block; margin-top: -0.3rem;" data-i18n="csv_columns_help">
+                        Nous vous recommandons de ne pas toucher à cette partie
+                    </small>
+
+                    <div class="modern-checkbox-container" style="margin-top:0.8rem;">
+                        <input class="modern-checkbox" type="checkbox" id="col-id" onchange="saveConfig()">
+                        <label class="modern-checkbox-label" for="col-id">ID</label>
+                    </div>
+
+                    <div class="modern-checkbox-container">
+                        <input class="modern-checkbox" type="checkbox" id="col-rank" onchange="saveConfig()">
+                        <label class="modern-checkbox-label" for="col-rank" data-i18n="col_rank">Rank / Position</label>
+                    </div>
+
+                    <div class="modern-checkbox-container">
+                        <input class="modern-checkbox" type="checkbox" id="col-username" checked onchange="saveConfig()">
+                        <label class="modern-checkbox-label" for="col-username">Username</label>
+                    </div>
+
+                    <div class="modern-checkbox-container">
+                        <input class="modern-checkbox" type="checkbox" id="col-teamname" onchange="saveConfig()">
+                        <label class="modern-checkbox-label" for="col-teamname">Team Name</label>
+                    </div>
+
+                    <div class="modern-checkbox-container">
+                        <input class="modern-checkbox" type="checkbox" id="col-email" checked onchange="saveConfig()">
+                        <label class="modern-checkbox-label" for="col-email">Email</label>
+                    </div>
+
+                    <div class="modern-checkbox-container">
+                        <input class="modern-checkbox" type="checkbox" id="col-score" onchange="saveConfig()">
+                        <label class="modern-checkbox-label" for="col-score">Score</label>
+                    </div>
+
+                    <div class="section-separator"></div>
+
+                    <!-- Boutons de configuration -->
+                    <button class="modern-btn modern-btn-primary modern-btn-sm btn-block mb-2" id="save-config-btn" data-i18n="save">
+                        Sauvegarder
+                    </button>
+                    <button class="modern-btn modern-btn-danger modern-btn-sm btn-block" id="btn-clear-config" data-i18n="reset">
+                        Réinitialiser
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Extractions -->
+        <div class="col-lg-8">
+            <div class="modern-card animate-in">
+                <div class="modern-card-header">
+                    <span data-i18n="data_extraction">Extractions de données</span>
+                    <button class="modern-btn modern-btn-sm modern-btn-primary" id="btn-refresh" data-i18n="refresh">
+                        Actualiser
+                    </button>
+                </div>
+
+                <div class="modern-card-body">
+                    <!-- Onglets -->
+                    <ul class="nav modern-tabs" id="extractionTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="global-tab" data-toggle="tab" href="#global" role="tab" data-i18n="tab_global">
+                                Globale
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="zerofail-tab" data-toggle="tab" href="#zerofail" role="tab" data-i18n="tab_zerofail">
+                                0% Fail
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="topn-tab" data-toggle="tab" href="#topn" role="tab" data-i18n="tab_topn">
+                                TOP N
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="nohint-tab" data-toggle="tab" href="#nohint" role="tab" data-i18n="tab_nohint">
+                                No Hint
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="solvedchall-tab" data-toggle="tab" href="#solvedchall" role="tab" data-i18n="tab_solved">
+                                Résolu le challenge X
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="excluded-tab" data-toggle="tab" href="#excluded" role="tab" data-i18n="tab_excluded">
+                                Exclus
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content mt-4" id="extractionTabContent">
+                        <!-- Onglet Globale -->
+                        <div class="tab-pane fade show active" id="global" role="tabpanel">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                                <h5 style="margin: 0; font-weight: 700;" data-i18n="global_title">Extraction Globale</h5>
+                                <span class="modern-badge badge-gradient-info">
+                                    <span id="global-count">0</span>&nbsp;<span data-i18n="results">résultats</span>
+                                </span>
+                            </div>
+
+                            <div class="modern-table-container">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="global-tbody">
+                                        <tr><td colspan="3" style="text-align: center; padding: 2.5rem;" class="text-muted-bdg" data-i18n-html="row_refresh"> Cliquez sur <strong>"Actualiser"</strong> pour charger les données</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button class="modern-btn modern-btn-success btn-block mt-3" id="btn-export-global" data-i18n="dl_csv">
+                                Télécharger le CSV
+                            </button>
+                            <button type="button" class="modern-btn modern-btn-primary btn-block mt-2" onclick="openCopyModal('global', 'Tous les utilisateurs')" data-i18n="copy_ue">
+                                Copier (username,email)
+                            </button>
+                            <div id="global-message" class="mt-2" style="display: none;"></div>
+                        </div>
+
+                        <!-- Onglet 0% Fail -->
+                        <div class="tab-pane fade" id="zerofail" role="tabpanel">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                                <h5 style="margin: 0; font-weight: 700;" data-i18n="zerofail_title">Sans erreur (0% Fail)</h5>
+
+                                <span class="modern-badge badge-gradient-success">
+                                    <span id="zerofail-count">0</span>&nbsp;<span data-i18n="results">résultats</span>
+                                </span>
+                            </div>
+
+                            <div class="modern-alert mb-3">
+                                <strong data-i18n="info">Information</strong><br>
+                                <span data-i18n="zerofail_info">Afficher les équipes / joueurs ayant 0% de fail durant l'évènement.</span>
+                            </div>
+
+                            <div class="modern-table-container">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th id="zerofail-col-name" data-i18n="col_name">Nom</th>
+                                            <th data-i18n="col_emails">Email(s)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="zerofail-tbody">
+                                        <tr><td colspan="3" style="text-align: center; padding: 2.5rem;" class="text-muted-bdg" data-i18n-html="row_refresh"> Cliquez sur <strong>"Actualiser"</strong> pour charger les données</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button class="modern-btn modern-btn-success btn-block mt-3" id="btn-export-zerofail" data-i18n="dl_csv">
+                                Télécharger le CSV
+                            </button>
+                            <button type="button" class="modern-btn modern-btn-primary btn-block mt-2" onclick="openCopyModal('zerofail', '0% Fail')" data-i18n="copy_ue">
+                                Copier (username,email)
+                            </button>
+                            <div id="zerofail-message" class="mt-2" style="display: none;"></div>
+                        </div>
+
+                        <!-- Onglet TOP N -->
+                        <div class="tab-pane fade" id="topn" role="tabpanel">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                                <h5 style="margin: 0; font-weight: 700;">TOP N</h5>
+                                <span class="modern-badge badge-gradient-warning">
+                                    TOP <span id="topn-count">0</span>
+                                </span>
+                            </div>
+
+                            <div class="modern-alert mb-3">
+                                <strong data-i18n="info">Information</strong><br>
+                                <span data-i18n="topn_info">Classement final de l'événement. Téléchargez une archive ZIP contenant plusieurs fichiers CSV, un par équipe, avec les informations détaillées de chacune, idéal pour attribuer des badges « TOP 1 », « TOP 2 », etc.</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label style="font-weight: 700; display: block; margin-bottom: 0.5rem;" data-i18n="topn_positions">Nombre de positions à exporter :</label>
+                                <input type="number" class="modern-input" id="topn-limit" min="1" max="100" value="3" onchange="saveConfig(); refreshCurrentTab()" style="max-width: 150px;">
+                            </div>
+
+                            <div class="mb-3" id="topn-basis-wrapper" style="display: none;">
+                                <label style="font-weight: 700; display: block; margin-bottom: 0.5rem;">
+                                    <span data-i18n="topn_basis">Classement basé sur :</span>
+                                    <small style="font-weight: 400;">(plugin score-override)</small>
+                                </label>
+                                <select class="modern-select" id="topn-basis" onchange="saveConfig(); refreshCurrentTab()" style="max-width: 320px;">
+                                    <option value="general" data-i18n="topn_basis_general">Général (score)</option>
+                                </select>
+                            </div>
+
+                            <div class="modern-table-container">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th id="topn-col-name" data-i18n="col_name">Nom</th>
+                                            <th>Score</th>
+                                            <th data-i18n="col_emails">Email(s)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="topn-tbody">
+                                        <tr><td colspan="4" style="text-align: center; padding: 2.5rem;" class="text-muted-bdg" data-i18n-html="row_refresh"> Cliquez sur <strong>"Actualiser"</strong> pour charger les données</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button class="modern-btn modern-btn-warning btn-block mt-3" id="btn-export-topn" data-i18n="dl_zip">
+                                Télécharger le ZIP
+                            </button>
+                            <button type="button" class="modern-btn modern-btn-primary btn-block mt-2" onclick="openCopyModal('topn', 'TOP N')" data-i18n="copy_ue">
+                                Copier (username,email)
+                            </button>
+                            <div id="topn-message" class="mt-2" style="display: none;"></div>
+                        </div>
+
+                        <!-- Onglet No Hint -->
+                        <div class="tab-pane fade" id="nohint" role="tabpanel">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                                <h5 style="margin: 0; font-weight: 700;" data-i18n="nohint_title">Sans hints</h5>
+                                <span class="modern-badge badge-gradient-info">
+                                    <span id="nohint-count">0</span>&nbsp;<span data-i18n="results">résultats</span>
+                                </span>
+                            </div>
+
+                            <div class="modern-alert mb-3">
+                                <strong data-i18n="info">Information</strong><br>
+                                <span data-i18n="nohint_info">Afficher les équipes / joueurs ayant pris aucun hint durant l'évènement.</span>
+                            </div>
+
+                            <div class="modern-table-container">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th id="nohint-col-name" data-i18n="col_name">Nom</th>
+                                            <th data-i18n="col_emails">Email(s)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="nohint-tbody">
+                                        <tr><td colspan="3" style="text-align: center; padding: 2.5rem;" class="text-muted-bdg" data-i18n-html="row_refresh"> Cliquez sur <strong>"Actualiser"</strong> pour charger les données</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button class="modern-btn modern-btn-info btn-block mt-3" id="btn-export-nohint" data-i18n="dl_csv">
+                                Télécharger le CSV
+                            </button>
+                            <button type="button" class="modern-btn modern-btn-primary btn-block mt-2" onclick="openCopyModal('nohint', 'No Hint')" data-i18n="copy_ue">
+                                Copier (username,email)
+                            </button>
+                            <div id="nohint-message" class="mt-2" style="display: none;"></div>
+                        </div>
+
+                        <!-- Onglet Résolu le challenge X -->
+                        <div class="tab-pane fade" id="solvedchall" role="tabpanel">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                                <h5 style="margin: 0; font-weight: 700;" data-i18n="solved_title">Résolu le challenge X</h5>
+                                <span class="modern-badge badge-gradient-success">
+                                    <span id="solvedchall-count">0</span>&nbsp;<span data-i18n="results">résultats</span>
+                                </span>
+                            </div>
+
+                            <div class="modern-alert mb-3">
+                                <strong data-i18n="info">Information</strong><br>
+                                <span data-i18n="solved_info">Liste des équipes / joueurs ayant résolu le challenge sélectionné ci-dessous — indépendant du filtre challenge global des autres onglets. Pratique par exemple pour exporter qui a terminé tout le CTF en choisissant le dernier challenge d'un parcours.</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label style="font-weight: 700; display: block; margin-bottom: 0.5rem;" data-i18n="challenge_label">Challenge :</label>
+                                <select class="modern-select" id="solvedchall-select" onchange="refreshCurrentTab()">
+                                    <option value="" data-i18n="choose_challenge">— Choisir un challenge —</option>
+                                </select>
+                            </div>
+
+                            <div class="modern-table-container">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th id="solvedchall-col-name" data-i18n="col_name">Nom</th>
+                                            <th data-i18n="col_emails">Email(s)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="solvedchall-tbody">
+                                        <tr><td colspan="3" style="text-align: center; padding: 2.5rem;" class="text-muted-bdg" data-i18n-html="row_choose"> Choisissez un challenge puis cliquez sur <strong>"Actualiser"</strong></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <button class="modern-btn modern-btn-success btn-block mt-3" id="btn-export-solvedchall" data-i18n="dl_csv">
+                                Télécharger le CSV
+                            </button>
+                            <button type="button" class="modern-btn modern-btn-primary btn-block mt-2" onclick="openCopyModal('solvedchall', 'Résolu le challenge')" data-i18n="copy_ue">
+                                Copier (username,email)
+                            </button>
+                            <div id="solvedchall-message" class="mt-2" style="display: none;"></div>
+                        </div>
+
+                        <!-- Onglet Exclus -->
+                        <div class="tab-pane fade" id="excluded" role="tabpanel">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                                <h5 style="margin: 0; font-weight: 700;" data-i18n="excluded_title">Utilisateurs exclus</h5>
+                                <span class="modern-badge badge-gradient-danger">
+                                    <span id="excluded-count">0</span>&nbsp;<span data-i18n="excluded_word">exclus</span>
+                                </span>
+                            </div>
+
+                            <div class="modern-alert mb-3">
+                                <strong data-i18n="info">Information</strong><br>
+                                <span data-i18n="excluded_info">Cette liste affiche les utilisateurs exclus par vos filtres (domaines, admins, hidden, challenge)</span>
+                            </div>
+
+                            <div class="modern-table-container">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th data-i18n="col_reason">Raison</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="excluded-tbody">
+                                        <tr><td colspan="4" style="text-align: center; padding: 2.5rem;" class="text-muted-bdg" data-i18n-html="row_refresh"> Cliquez sur <strong>"Actualiser"</strong> pour charger les données</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div id="excluded-message" class="mt-2" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popup copier-coller "username,email" — partagee par tous les onglets -->
+<div id="copy-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:9999; align-items:center; justify-content:center;">
+    <div class="bdg-modal" style="border-radius:16px; padding:1.75rem; max-width:620px; width:92%; max-height:80vh; display:flex; flex-direction:column;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+            <h5 id="copy-modal-title" style="margin:0; font-weight:700;" data-i18n="copy">Copier</h5>
+            <button type="button" class="bdg-close" onclick="closeCopyModal()" style="background:none; border:none; font-size:1.5rem; line-height:1; cursor:pointer;">&times;</button>
+        </div>
+        <p id="copy-modal-subtitle" style="margin:0 0 0.75rem; font-size:0.85rem;" class="text-muted-bdg"></p>
+        <textarea id="copy-modal-textarea" readonly
+            style="flex:1; min-height:320px; font-family:monospace; font-size:0.85rem; padding:0.75rem; border-radius:10px; resize:vertical;"
+            onclick="this.select()"></textarea>
+        <button type="button" class="modern-btn modern-btn-info btn-block mt-3" id="btn-copy-clipboard" data-i18n="copy_clip">
+            Copier dans le presse-papier
+        </button>
+        <div id="copy-modal-msg" class="mt-2" style="display:none; font-weight:700; color:#86efac;" data-i18n="copied">Copié dans le presse-papier !</div>
+    </div>
+</div>
+
+</div><!-- /#badgify-root -->
+<script>
+    // Variables globales
+    let challenges = [];
+    let excludedDomains = [];
+    // Base de classement TOP N restauree depuis la config sauvegardee —
+    // appliquee une fois le selecteur rempli par loadRankingBases() (qui
+    // tourne apres loadConfig() au chargement, donc le <select> n'a pas
+    // encore ses <option> au moment ou loadConfig() s'execute).
+    let savedTopNBasis = null;
+    
+    // Gestion de la pagination
+    const paginationState = {
+        global: { currentPage: 1, itemsPerPage: 50, totalItems: 0, data: [] },
+        zerofail: { currentPage: 1, itemsPerPage: 50, totalItems: 0, data: [] },
+        topn: { currentPage: 1, itemsPerPage: 50, totalItems: 0, data: [] },
+        nohint: { currentPage: 1, itemsPerPage: 50, totalItems: 0, data: [] },
+        solvedchall: { currentPage: 1, itemsPerPage: 50, totalItems: 0, data: [] },
+        excluded: { currentPage: 1, itemsPerPage: 50, totalItems: 0, data: [] }
+    };
+
+    // Sécurité XSS
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function sanitizeAttribute(text) {
+        if (!text) return '';
+        return String(text).replace(/['"<>&]/g, function(char) {
+            const escapeChars = {
+                '"': '&quot;',
+                "'": '&#39;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '&': '&amp;'
+            };
+            return escapeChars[char];
+        });
+    }
+
+    function getCSRFToken() {
+        return window.init.csrfNonce;
+    }
+
+    function getSelectedMode() {
+        return document.getElementById('mode-select').value;
+    }
+
+    // Mise à jour des noms de colonnes selon le mode
+    function updateColumnHeaders() {
+        const mode = getSelectedMode();
+        const isTeamMode = mode === 'teams';
+        
+        // Mettre à jour les headers
+        const zerofailCol = document.getElementById('zerofail-col-name');
+        const topnCol = document.getElementById('topn-col-name');
+        const nohintCol = document.getElementById('nohint-col-name');
+        const solvedchallCol = document.getElementById('solvedchall-col-name');
+
+        if (zerofailCol) zerofailCol.textContent = isTeamMode ? 'Nom de l\'équipe' : 'Username';
+        if (topnCol) topnCol.textContent = isTeamMode ? 'Nom de l\'équipe' : 'Username';
+        if (nohintCol) nohintCol.textContent = isTeamMode ? 'Nom de l\'équipe' : 'Username';
+        if (solvedchallCol) solvedchallCol.textContent = isTeamMode ? 'Nom de l\'équipe' : 'Username';
+    }
+
+    // Sauvegarde config
+    async function saveConfig() {
+        const config = {
+            mode: document.getElementById('mode-select').value,
+            excludedDomains: excludedDomains,
+            excludeAdmins: document.getElementById('exclude-admins').checked,
+            excludeHidden: document.getElementById('exclude-hidden').checked,
+            challengeId: document.getElementById('challenge-select').value,
+            columns: {
+                id: document.getElementById('col-id').checked,
+                rank: document.getElementById('col-rank').checked,
+                username: document.getElementById('col-username').checked,
+                teamname: document.getElementById('col-teamname').checked,
+                email: document.getElementById('col-email').checked,
+                score: document.getElementById('col-score').checked
+            },
+            topNLimit: document.getElementById('topn-limit').value,
+            topNBasis: document.getElementById('topn-basis') ? document.getElementById('topn-basis').value : 'general'
+        };
+        
+        try {
+            const response = await fetch('/admin/badges_extraction/api/config', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': getCSRFToken()
+                },
+                body: JSON.stringify(config)
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (error) {
+            return false;
+        }
+    }
+
+    async function saveConfigManual() {
+        const btn = document.getElementById('save-config-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ Sauvegarde...';
+        btn.disabled = true;
+        
+        const success = await saveConfig();
+        
+        if (success) {
+            btn.innerHTML = 'Sauvegardé !';
+            btn.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+        } else {
+            btn.innerHTML = '❌ Erreur';
+            btn.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+        }
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = '';
+            btn.disabled = false;
+        }, 2000);
+    }
+
+    async function loadConfig() {
+        try {
+            const response = await fetch('/admin/badges_extraction/api/config');
+            const data = await response.json();
+            
+            if (!data.success || !data.config) {
+                return;
+            }
+            
+            const config = data.config;
+            
+            if (config.mode) {
+                document.getElementById('mode-select').value = config.mode;
+                updateColumnHeaders();
+            }
+            
+            if (config.excludedDomains && Array.isArray(config.excludedDomains)) {
+                excludedDomains = config.excludedDomains;
+                displayDomains();
+            }
+            
+            if (config.excludeAdmins !== undefined) {
+                document.getElementById('exclude-admins').checked = config.excludeAdmins;
+            }
+            if (config.excludeHidden !== undefined) {
+                document.getElementById('exclude-hidden').checked = config.excludeHidden;
+            }
+            
+            if (config.challengeId) {
+                setTimeout(() => {
+                    document.getElementById('challenge-select').value = config.challengeId;
+                }, 500);
+            }
+            
+            if (config.columns) {
+                if (config.columns.id !== undefined) document.getElementById('col-id').checked = config.columns.id;
+                if (config.columns.rank !== undefined) document.getElementById('col-rank').checked = config.columns.rank;
+                if (config.columns.username !== undefined) document.getElementById('col-username').checked = config.columns.username;
+                if (config.columns.teamname !== undefined) document.getElementById('col-teamname').checked = config.columns.teamname;
+                if (config.columns.email !== undefined) document.getElementById('col-email').checked = config.columns.email;
+                if (config.columns.score !== undefined) document.getElementById('col-score').checked = config.columns.score;
+            }
+            
+            if (config.topNLimit) {
+                document.getElementById('topn-limit').value = config.topNLimit;
+            }
+            if (config.topNBasis) {
+                savedTopNBasis = config.topNBasis;
+            }
+        } catch (error) {
+            // Erreur silencieuse
+        }
+    }
+
+    async function clearConfig() {
+        if (confirm('⚠️ Voulez-vous vraiment réinitialiser toutes les options ?')) {
+            try {
+                const response = await fetch('/admin/badges_extraction/api/config', {
+                    method: 'DELETE',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'CSRF-Token': getCSRFToken()
+                    }
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Configuration réinitialisée !');
+                    location.reload();
+                } else {
+                    alert('❌ Erreur: ' + escapeHtml(data.error));
+                }
+            } catch (error) {
+                alert('Erreur lors de la réinitialisation');
+            }
+        }
+    }
+
+    async function loadCTFdMode() {
+        try {
+            const response = await fetch('/admin/badges_extraction/api/mode');
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('mode-select').value = data.mode;
+            }
+        } catch (error) {
+            // Erreur silencieuse
+        }
+    }
+
+    async function loadTotalUsers() {
+        try {
+            const response = await fetch('/admin/badges_extraction/api/users');
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('total-users').textContent = data.total_users || data.count;
+            }
+        } catch (error) {
+            // Erreur silencieuse
+        }
+    }
+
+    async function loadChallenges() {
+        try {
+            const response = await fetch('/admin/badges_extraction/api/challenges');
+            const data = await response.json();
+            
+            if (data.success) {
+                challenges = data.challenges;
+                populateChallengeSelect();
+            }
+        } catch (error) {
+            // Erreur silencieuse
+        }
+    }
+
+    function populateChallengeSelect() {
+        const categoriesMap = {};
+        challenges.forEach(challenge => {
+            if (!categoriesMap[challenge.category]) {
+                categoriesMap[challenge.category] = [];
+            }
+            categoriesMap[challenge.category].push(challenge);
+        });
+
+        function fillSelect(select) {
+            Object.keys(categoriesMap).sort().forEach(category => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = escapeHtml(category);
+
+                categoriesMap[category].forEach(challenge => {
+                    const option = document.createElement('option');
+                    option.value = challenge.id;
+                    option.textContent = challenge.name;
+                    optgroup.appendChild(option);
+                });
+
+                select.appendChild(optgroup);
+            });
+        }
+
+        const select = document.getElementById('challenge-select');
+        var _allLbl = (function(){ try { return localStorage.getItem('badgify_lang')==='en' ? '— All challenges —' : '— Tous les challenges —'; } catch(e){ return '— Tous les challenges —'; } })();
+        select.innerHTML = '<option value="" data-i18n="all_users">'+_allLbl+'</option>';
+        fillSelect(select);
+
+        // Selecteur dedie de l'onglet "Résolu le challenge X" — independant
+        // du filtre global ci-dessus (une selection n'affecte pas l'autre).
+        const solvedSelect = document.getElementById('solvedchall-select');
+        if (solvedSelect) {
+            solvedSelect.innerHTML = '<option value="">— Choisir un challenge —</option>';
+            fillSelect(solvedSelect);
+        }
+    }
+
+    // Bases de classement du TOP N (plugin score-override, optionnel) — le
+    // selecteur reste masque si seul "general" est disponible (plugin absent
+    // ou aucun tiebreaker/dispositif configure dessus), le TOP N continue
+    // alors de fonctionner exactement comme avant son ajout (tri natif CTFd).
+    async function loadRankingBases() {
+        const wrapper = document.getElementById('topn-basis-wrapper');
+        const select = document.getElementById('topn-basis');
+        if (!wrapper || !select) return;
+        try {
+            const response = await fetch('/admin/badges_extraction/api/ranking_bases', { credentials: 'same-origin' });
+            const data = await response.json();
+            if (!data.success) return;
+
+            const bases = data.bases || {};
+            const order = ['general', 'native', 'time', 'solo', 'speedrun', 'presentiel'];
+            const availableKeys = order.filter(k => bases[k] && bases[k].available);
+
+            if (availableKeys.length <= 1) {
+                wrapper.style.display = 'none';
+                return;
+            }
+
+            select.innerHTML = availableKeys.map(k =>
+                `<option value="${k}">${escapeHtml(bases[k].label)}</option>`
+            ).join('');
+            wrapper.style.display = '';
+
+            if (savedTopNBasis && availableKeys.includes(savedTopNBasis)) {
+                select.value = savedTopNBasis;
+            }
+        } catch (error) {
+            // Plugin absent / erreur reseau : le selecteur reste masque, le
+            // TOP N continue de fonctionner en classement general natif.
+            wrapper.style.display = 'none';
+        }
+    }
+
+    // Gestion domaines
+    function addDomain() {
+        const input = document.getElementById('domain-input');
+        const domain = input.value.trim().toLowerCase();
+        
+        if (!domain) {
+            alert('Veuillez entrer un domaine valide');
+            return;
+        }
+        
+        if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain)) {
+            alert('Format de domaine invalide');
+            return;
+        }
+        
+        if (excludedDomains.includes(domain)) {
+            alert('Ce domaine est déjà dans la liste');
+            return;
+        }
+        
+        excludedDomains.push(domain);
+        input.value = '';
+        displayDomains();
+        saveConfig();
+        refreshCurrentTab();
+    }
+
+    function removeDomain(domain) {
+        excludedDomains = excludedDomains.filter(d => d !== domain);
+        displayDomains();
+        saveConfig();
+        refreshCurrentTab();
+    }
+
+    function displayDomains() {
+        const list = document.getElementById('domains-list');
+        
+        if (excludedDomains.length === 0) {
+            list.innerHTML = '<div style="text-align: center; padding: 2rem; color: #999; font-weight: 600;">Aucun domaine exclu</div>';
+            return;
+        }
+        
+        list.innerHTML = '';
+        excludedDomains.forEach(domain => {
+            const div = document.createElement('div');
+            div.className = 'modern-domain-item';
+            div.innerHTML = `
+                <strong>${escapeHtml(domain)}</strong>
+                <button class="modern-domain-delete-btn" data-domain="${sanitizeAttribute(domain)}">×</button>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    function getFilterParams() {
+        return {
+            mode: getSelectedMode(),
+            exclude_admins: document.getElementById('exclude-admins').checked,
+            exclude_hidden: document.getElementById('exclude-hidden').checked,
+            challenge_id: document.getElementById('challenge-select').value || null,
+            excluded_domains: excludedDomains,
+            columns: {
+                id: document.getElementById('col-id').checked,
+                rank: document.getElementById('col-rank').checked,
+                username: document.getElementById('col-username').checked,
+                teamname: document.getElementById('col-teamname').checked,
+                email: document.getElementById('col-email').checked,
+                score: document.getElementById('col-score').checked
+            }
+        };
+    }
+
+    async function refreshCurrentTab() {
+        const activeTab = document.querySelector('#extractionTabs .nav-link.active');
+        const tabId = activeTab.getAttribute('href').replace('#', '');
+        
+        switch(tabId) {
+            case 'global':
+                await loadGlobalPreview();
+                break;
+            case 'zerofail':
+                await loadZeroFailPreview();
+                break;
+            case 'topn':
+                await loadTopNPreview();
+                break;
+            case 'nohint':
+                await loadNoHintPreview();
+                break;
+            case 'solvedchall':
+                await loadSolvedChallPreview();
+                break;
+            case 'excluded':
+                await loadExcludedPreview();
+                break;
+        }
+    }
+
+    // Pagination
+    function createPagination(tabId, data, renderFunction) {
+        const state = paginationState[tabId];
+        state.data = data;
+        state.totalItems = data.length;
+        state.currentPage = 1;
+        
+        const tbody = document.getElementById(`${tabId}-tbody`);
+        if (!tbody) {
+            return;
+        }
+        
+        renderPage(tabId, renderFunction);
+        renderPaginationControls(tabId);
+    }
+
+    function renderPage(tabId, renderFunction) {
+        const state = paginationState[tabId];
+        const tbody = document.getElementById(`${tabId}-tbody`);
+        
+        const startIndex = (state.currentPage - 1) * state.itemsPerPage;
+        const endIndex = Math.min(startIndex + state.itemsPerPage, state.totalItems);
+        const pageData = state.data.slice(startIndex, endIndex);
+        
+        tbody.innerHTML = '';
+        
+        if (pageData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem; color: #999;">Aucun résultat</td></tr>';
+        } else {
+            pageData.forEach(item => {
+                tbody.insertAdjacentHTML('beforeend', renderFunction(item));
+            });
+        }
+        
+        document.getElementById(`${tabId}-count`).textContent = state.totalItems;
+    }
+
+    function renderPaginationControls(tabId) {
+        const state = paginationState[tabId];
+        const totalPages = Math.ceil(state.totalItems / state.itemsPerPage);
+        
+        let paginationContainer = document.querySelector(`#${tabId} .pagination-container`);
+        const tableContainer = document.querySelector(`#${tabId} .modern-table-container`);
+        
+        if (!tableContainer) {
+            return;
+        }
+        
+        if (!paginationContainer) {
+            paginationContainer = document.createElement('div');
+            paginationContainer.className = 'pagination-container';
+            tableContainer.parentNode.insertBefore(paginationContainer, tableContainer);
+        }
+        
+        if (state.totalItems === 0) {
+            paginationContainer.style.display = 'none';
+            return;
+        }
+        
+        paginationContainer.style.display = 'flex';
+        
+        const startIndex = (state.currentPage - 1) * state.itemsPerPage + 1;
+        const endIndex = Math.min(state.currentPage * state.itemsPerPage, state.totalItems);
+        
+        paginationContainer.innerHTML = `
+            <div class="pagination-info">
+                Affichage ${startIndex}-${endIndex} sur ${state.totalItems} résultats
+            </div>
+            <div class="pagination-controls">
+                <select class="pagination-select" data-tabid="${tabId}">
+                    <option value="25" ${state.itemsPerPage === 25 ? 'selected' : ''}>25 / page</option>
+                    <option value="50" ${state.itemsPerPage === 50 ? 'selected' : ''}>50 / page</option>
+                    <option value="100" ${state.itemsPerPage === 100 ? 'selected' : ''}>100 / page</option>
+                    <option value="200" ${state.itemsPerPage === 200 ? 'selected' : ''}>200 / page</option>
+                    <option value="500" ${state.itemsPerPage === 500 ? 'selected' : ''}>500 / page</option>
+                </select>
+                <button class="pagination-btn" data-tabid="${tabId}" data-page="1" ${state.currentPage === 1 ? 'disabled' : ''}>
+                    ⏮ Début
+                </button>
+                <button class="pagination-btn" data-tabid="${tabId}" data-page="${state.currentPage - 1}" ${state.currentPage === 1 ? 'disabled' : ''}>
+                    ◀ Préc
+                </button>
+                ${renderPageNumbers(tabId, state.currentPage, totalPages)}
+                <button class="pagination-btn" data-tabid="${tabId}" data-page="${state.currentPage + 1}" ${state.currentPage === totalPages ? 'disabled' : ''}>
+                    Suiv ▶
+                </button>
+                <button class="pagination-btn" data-tabid="${tabId}" data-page="${totalPages}" ${state.currentPage === totalPages ? 'disabled' : ''}>
+                    Fin ⏭
+                </button>
+            </div>
+        `;
+    }
+
+    function renderPageNumbers(tabId, currentPage, totalPages) {
+        if (totalPages <= 1) return '';
+        
+        let pages = [];
+        const maxButtons = 5;
+        
+        if (totalPages <= maxButtons) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            if (currentPage <= 3) {
+                pages = [1, 2, 3, 4, '...', totalPages];
+            } else if (currentPage >= totalPages - 2) {
+                pages = [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+            } else {
+                pages = [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+            }
+        }
+        
+        return pages.map(page => {
+            if (page === '...') {
+                return '<span style="padding: 0.6rem 0.8rem; color: #999;">...</span>';
+            }
+            const active = page === currentPage ? 'active' : '';
+            return `<button class="pagination-btn ${active}" data-tabid="${tabId}" data-page="${page}">${page}</button>`;
+        }).join('');
+    }
+
+    function goToPage(tabId, pageNumber) {
+        const state = paginationState[tabId];
+        const totalPages = Math.ceil(state.totalItems / state.itemsPerPage);
+        
+        if (pageNumber < 1 || pageNumber > totalPages) return;
+        
+        state.currentPage = pageNumber;
+        
+        let renderFunction;
+        switch(tabId) {
+            case 'global':
+                renderFunction = renderGlobalRow;
+                break;
+            case 'zerofail':
+                renderFunction = renderZeroFailRow;
+                break;
+            case 'topn':
+                renderFunction = renderTopNRow;
+                break;
+            case 'nohint':
+                renderFunction = renderNoHintRow;
+                break;
+            case 'solvedchall':
+                renderFunction = renderSolvedChallRow;
+                break;
+            case 'excluded':
+                renderFunction = renderExcludedRow;
+                break;
+        }
+
+        renderPage(tabId, renderFunction);
+        renderPaginationControls(tabId);
+
+        document.querySelector(`#${tabId} .modern-table-container`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function changeItemsPerPage(tabId, newValue) {
+        const state = paginationState[tabId];
+        state.itemsPerPage = parseInt(newValue);
+        state.currentPage = 1;
+        
+        let renderFunction;
+        switch(tabId) {
+            case 'global':
+                renderFunction = renderGlobalRow;
+                break;
+            case 'zerofail':
+                renderFunction = renderZeroFailRow;
+                break;
+            case 'topn':
+                renderFunction = renderTopNRow;
+                break;
+            case 'nohint':
+                renderFunction = renderNoHintRow;
+                break;
+            case 'solvedchall':
+                renderFunction = renderSolvedChallRow;
+                break;
+            case 'excluded':
+                renderFunction = renderExcludedRow;
+                break;
+        }
+
+        renderPage(tabId, renderFunction);
+        renderPaginationControls(tabId);
+    }
+
+    // Fonctions de rendu des lignes
+    function renderGlobalRow(user) {
+        return `<tr data-user-id="${user.id}">
+            <td>${escapeHtml(user.id)}</td>
+            <td>${escapeHtml(user.username)}</td>
+            <td>${escapeHtml(user.email)}</td>
+        </tr>`;
+    }
+
+    function renderZeroFailRow(item) {
+        const mode = paginationState.zerofail.mode;
+        
+        return mode === 'teams' 
+            ? `<tr data-user-id="${item.id}">
+                <td>${escapeHtml(item.id)}</td>
+                <td>${escapeHtml(item.name)}</td>
+                <td><small>${escapeHtml(item.emails)}</small></td>
+            </tr>`
+            : `<tr data-user-id="${item.id}">
+                <td>${escapeHtml(item.id)}</td>
+                <td>${escapeHtml(item.name)}</td>
+                <td>${escapeHtml(item.email)}</td>
+            </tr>`;
+    }
+
+    function renderTopNRow(item) {
+        const mode = paginationState.topn.mode;
+        
+        return mode === 'teams'
+            ? `<tr data-user-id="${item.id}">
+                <td><strong style="font-size: 1.2rem; color: #667eea;">🏆 ${escapeHtml(item.rank)}</strong></td>
+                <td>${escapeHtml(item.name)}</td>
+                <td><strong>${escapeHtml(item.score)}</strong></td>
+                <td><small>${escapeHtml(item.emails)}</small></td>
+            </tr>`
+            : `<tr data-user-id="${item.id}">
+                <td><strong style="font-size: 1.2rem; color: #667eea;">🏆 ${escapeHtml(item.rank)}</strong></td>
+                <td>${escapeHtml(item.name)}</td>
+                <td><strong>${escapeHtml(item.score)}</strong></td>
+                <td>${escapeHtml(item.email)}</td>
+            </tr>`;
+    }
+
+    function renderSolvedChallRow(item) {
+        const mode = paginationState.solvedchall.mode;
+
+        return mode === 'teams'
+            ? `<tr data-user-id="${item.id}">
+                <td>${escapeHtml(item.id)}</td>
+                <td>${escapeHtml(item.name)}</td>
+                <td><small>${escapeHtml(item.emails)}</small></td>
+            </tr>`
+            : `<tr data-user-id="${item.id}">
+                <td>${escapeHtml(item.id)}</td>
+                <td>${escapeHtml(item.name)}</td>
+                <td>${escapeHtml(item.email)}</td>
+            </tr>`;
+    }
+
+    function renderNoHintRow(item) {
+        const mode = paginationState.nohint.mode;
+        
+        return mode === 'teams'
+            ? `<tr data-user-id="${item.id}">
+                <td>${escapeHtml(item.id)}</td>
+                <td>${escapeHtml(item.name)}</td>
+                <td><small>${escapeHtml(item.emails)}</small></td>
+            </tr>`
+            : `<tr data-user-id="${item.id}">
+                <td>${escapeHtml(item.id)}</td>
+                <td>${escapeHtml(item.name)}</td>
+                <td>${escapeHtml(item.email)}</td>
+            </tr>`;
+    }
+
+    function renderExcludedRow(user) {
+        return `<tr data-user-id="${user.id}">
+            <td>${escapeHtml(user.id)}</td>
+            <td>${escapeHtml(user.username)}</td>
+            <td>${escapeHtml(user.email)}</td>
+            <td><span class="modern-badge badge-gradient-danger" style="font-size: 0.75rem; padding: 0.3rem 0.8rem;">
+                ${escapeHtml(user.reason)}
+            </span></td>
+        </tr>`;
+    }
+
+    // Aperçus
+    async function loadGlobalPreview() {
+        const tbody = document.getElementById('global-tbody');
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 3rem; color: #667eea; font-weight: 600;"> Cliquez sur <strong>"🔄 Actualiser"</strong> pour charger les données</td></tr>';
+        
+        try {
+            const params = getFilterParams();
+            const url = '/admin/badges_extraction/api/users';
+            const queryParams = new URLSearchParams();
+            if (params.exclude_admins) queryParams.append('exclude_admins', 'true');
+            if (params.exclude_hidden) queryParams.append('exclude_hidden', 'true');
+            if (params.challenge_id) queryParams.append('challenge_id', params.challenge_id);
+            
+            const response = await fetch(`${url}?${queryParams}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                let filteredUsers = data.users.filter(user => {
+                    const domain = (user.email || '').split('@')[1]?.toLowerCase();
+                    return !excludedDomains.includes(domain);
+                });
+                
+                createPagination('global', filteredUsers, renderGlobalRow);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem; color: #f5576c;">❌ Erreur API</td></tr>';
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem; color: #f5576c;">❌ Erreur de chargement</td></tr>';
+        }
+    }
+
+    async function loadZeroFailPreview() {
+        const tbody = document.getElementById('zerofail-tbody');
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 3rem; color: #667eea; font-weight: 600;"> Cliquez sur <strong>"🔄 Actualiser"</strong> pour charger les données</td></tr>';
+        
+        try {
+            const params = getFilterParams();
+            const response = await fetch('/admin/badges_extraction/api/preview/zero_fail', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': getCSRFToken()
+                },
+                body: JSON.stringify(params)
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                paginationState.zerofail.mode = data.mode;
+                createPagination('zerofail', data.results, renderZeroFailRow);
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem; color: #f5576c;">❌ Erreur</td></tr>';
+        }
+    }
+
+    async function loadTopNPreview() {
+        const tbody = document.getElementById('topn-tbody');
+        const limit = parseInt(document.getElementById('topn-limit').value) || 3;
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 3rem; color: #667eea; font-weight: 600;"> Cliquez sur <strong>"🔄 Actualiser"</strong> pour charger les données</td></tr>';
+        
+        try {
+            const params = getFilterParams();
+            params.top_limit = limit;
+            const basisSelect = document.getElementById('topn-basis');
+            params.ranking_basis = basisSelect ? (basisSelect.value || 'general') : 'general';
+
+            const response = await fetch('/admin/badges_extraction/api/preview/top_n', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': getCSRFToken()
+                },
+                body: JSON.stringify(params)
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                paginationState.topn.mode = data.mode;
+                createPagination('topn', data.results, renderTopNRow);
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #f5576c;">❌ Erreur</td></tr>';
+        }
+    }
+
+    async function loadNoHintPreview() {
+        const tbody = document.getElementById('nohint-tbody');
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 3rem; color: #667eea; font-weight: 600;"> Cliquez sur <strong>"🔄 Actualiser"</strong> pour charger les données</td></tr>';
+        
+        try {
+            const params = getFilterParams();
+            const response = await fetch('/admin/badges_extraction/api/preview/no_hint', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': getCSRFToken()
+                },
+                body: JSON.stringify(params)
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                paginationState.nohint.mode = data.mode;
+                createPagination('nohint', data.results, renderNoHintRow);
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem; color: #f5576c;">❌ Erreur</td></tr>';
+        }
+    }
+
+    async function loadSolvedChallPreview() {
+        const tbody = document.getElementById('solvedchall-tbody');
+        const challengeId = document.getElementById('solvedchall-select').value;
+
+        if (!challengeId) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 3rem; color: #667eea; font-weight: 600;">Choisissez un challenge ci-dessus</td></tr>';
+            document.getElementById('solvedchall-count').textContent = '0';
+            return;
+        }
+
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 3rem; color: #667eea; font-weight: 600;"> Chargement…</td></tr>';
+
+        try {
+            const params = getFilterParams();
+            params.challenge_id = challengeId;
+
+            const response = await fetch('/admin/badges_extraction/api/preview/challenge_solved', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': getCSRFToken()
+                },
+                body: JSON.stringify(params)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                paginationState.solvedchall.mode = data.mode;
+                createPagination('solvedchall', data.results, renderSolvedChallRow);
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem; color: #f5576c;">❌ ' + escapeHtml(data.error || 'Erreur') + '</td></tr>';
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 2rem; color: #f5576c;">❌ Erreur</td></tr>';
+        }
+    }
+
+    async function loadExcludedPreview() {
+        const tbody = document.getElementById('excluded-tbody');
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 3rem; color: #667eea; font-weight: 600;"> Cliquez sur <strong>"🔄 Actualiser"</strong> pour charger les données</td></tr>';
+        
+        try {
+            const params = getFilterParams();
+            
+            // Charger TOUS les users sans exception (nouvelle route)
+            const responseAll = await fetch('/admin/badges_extraction/api/users/all');
+            const dataAll = await responseAll.json();
+            
+            if (dataAll.success) {
+                const allUsers = dataAll.users;
+                const excludedUsers = [];
+                
+                allUsers.forEach(user => {
+                    let reason = [];
+                    let isExcluded = false;
+                    const domain = (user.email || '').split('@')[1]?.toLowerCase();
+                    
+                    // Vérifier domaine exclu
+                    if (excludedDomains.includes(domain)) {
+                        reason.push('Domaine exclu');
+                        isExcluded = true;
+                    }
+                    
+                    // Vérifier admin
+                    if (params.exclude_admins && user.type === 'admin') {
+                        reason.push('Administrateur');
+                        isExcluded = true;
+                    }
+                    
+                    // Vérifier hidden
+                    if (params.exclude_hidden && user.hidden) {
+                        reason.push('Compte caché');
+                        isExcluded = true;
+                    }
+                    
+                    if (isExcluded) {
+                        excludedUsers.push({
+                            id: user.id,
+                            username: user.username,
+                            email: user.email,
+                            type: user.type,
+                            hidden: user.hidden,
+                            reason: reason.join(', ')
+                        });
+                    }
+                });
+                
+                // Si filtre par challenge, ajouter ceux qui ne l'ont pas résolu
+                if (params.challenge_id) {
+                    try {
+                        const challengeId = parseInt(params.challenge_id);
+                        const urlWithChallenge = `/admin/badges_extraction/api/users?challenge_id=${challengeId}&exclude_admins=false&exclude_hidden=false`;
+                        const responseSolved = await fetch(urlWithChallenge);
+                        const dataSolved = await responseSolved.json();
+                        
+                        if (dataSolved.success) {
+                            const solvedIds = new Set(dataSolved.users.map(u => u.id));
+                            
+                            allUsers.forEach(user => {
+                                if (!solvedIds.has(user.id)) {
+                                    const alreadyExcluded = excludedUsers.find(eu => eu.id === user.id);
+                                    if (alreadyExcluded) {
+                                        alreadyExcluded.reason += ', Challenge non résolu';
+                                    } else {
+                                        const domain = (user.email || '').split('@')[1]?.toLowerCase();
+                                        let shouldAdd = true;
+                                        
+                                        // Ne pas ajouter si déjà exclu par domaine
+                                        if (excludedDomains.includes(domain)) {
+                                            shouldAdd = false;
+                                        }
+                                        // Ne pas ajouter si déjà exclu par admin
+                                        if (params.exclude_admins && user.type === 'admin') {
+                                            shouldAdd = false;
+                                        }
+                                        // Ne pas ajouter si déjà exclu par hidden
+                                        if (params.exclude_hidden && user.hidden) {
+                                            shouldAdd = false;
+                                        }
+                                        
+                                        if (shouldAdd) {
+                                            excludedUsers.push({
+                                                id: user.id,
+                                                username: user.username,
+                                                email: user.email,
+                                                type: user.type,
+                                                hidden: user.hidden,
+                                                reason: 'Challenge non résolu'
+                                            });
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        // Erreur silencieuse
+                    }
+                }
+                
+                createPagination('excluded', excludedUsers, renderExcludedRow);
+            }
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 2rem; color: #f5576c;">❌ Erreur</td></tr>';
+        }
+    }
+
+    // Popup copier-coller "username,email" — pour import sur une plateforme
+    // tierce qui accepte ce format. Reutilise les donnees deja chargees en
+    // aperçu (paginationState[tabId].data, l'ensemble complet, pas juste la
+    // page affichee) — pas de nouvel appel reseau. En mode equipes, chaque
+    // MEMBRE devient sa propre ligne (c'est bien des comptes individuels que
+    // la plateforme cible importe, pas des equipes) ; en mode solo/global,
+    // chaque entree est deja individuelle.
+    function buildPairsFromData(tabId) {
+        const state = paginationState[tabId];
+        const data = (state && state.data) || [];
+        const pairs = [];
+
+        if (tabId === 'global') {
+            // /api/users renvoie toujours des comptes individuels a plat,
+            // quel que soit le mode CTFd (voir get_users_data cote serveur).
+            data.forEach(item => {
+                if (item.email) pairs.push(`${item.username},${item.email}`);
+            });
+            return pairs;
+        }
+
+        if (state.mode === 'teams') {
+            data.forEach(item => {
+                (item.members || []).forEach(m => {
+                    if (m.email) pairs.push(`${m.username},${m.email}`);
+                });
+            });
+        } else {
+            data.forEach(item => {
+                if (item.email) pairs.push(`${item.name},${item.email}`);
+            });
+        }
+        return pairs;
+    }
+
+    function openCopyModal(tabId, label) {
+        const pairs = buildPairsFromData(tabId);
+        document.getElementById('copy-modal-title').textContent = `📋 Copier — ${label}`;
+        document.getElementById('copy-modal-subtitle').textContent =
+            pairs.length
+                ? `${pairs.length} ligne(s) au format username,email — actualisez l'onglet d'abord si la liste semble vide ou obsolète.`
+                : `Aucune donnée chargée — cliquez d'abord sur "🔄 Actualiser".`;
+        document.getElementById('copy-modal-textarea').value = pairs.join('\n');
+        document.getElementById('copy-modal-msg').style.display = 'none';
+        document.getElementById('copy-modal').style.display = 'flex';
+    }
+
+    function closeCopyModal() {
+        document.getElementById('copy-modal').style.display = 'none';
+    }
+
+    async function copyModalToClipboard() {
+        const textarea = document.getElementById('copy-modal-textarea');
+        textarea.select();
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(textarea.value);
+            } else {
+                document.execCommand('copy');
+            }
+            document.getElementById('copy-modal-msg').style.display = 'block';
+        } catch (error) {
+            // Le select() ci-dessus permet au moins un Ctrl+C manuel si l'API
+            // Clipboard est indisponible (contexte non-https, permissions...).
+        }
+    }
+
+    // Exports
+    function showMessage(tabId, message, type) {
+        const messageDiv = document.getElementById(`${tabId}-message`);
+        const colors = {
+            success: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+            danger: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+        };
+        messageDiv.style.background = colors[type] || colors.success;
+        messageDiv.style.color = 'white';
+        messageDiv.style.padding = '1rem';
+        messageDiv.style.borderRadius = '12px';
+        messageDiv.style.fontWeight = '700';
+        messageDiv.textContent = message;
+        messageDiv.style.display = 'block';
+        
+        setTimeout(() => {
+            messageDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    async function downloadFile(url, params, tabId, successMsg) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'CSRF-Token': getCSRFToken()
+                },
+                body: JSON.stringify(params)
+            });
+            
+            if (response.ok) {
+                const blob = await response.blob();
+                const urlBlob = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = urlBlob;
+                
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'extraction.csv';
+                if (contentDisposition) {
+                    const match = contentDisposition.match(/filename=(.+)/);
+                    if (match) filename = match[1].replace(/['"]/g, '');
+                }
+                
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(urlBlob);
+                
+                showMessage(tabId, successMsg, 'success');
+            } else {
+                showMessage(tabId, '❌ Erreur lors de l\'extraction', 'danger');
+            }
+        } catch (error) {
+            showMessage(tabId, '❌ Erreur de connexion', 'danger');
+        }
+    }
+
+    async function exportGlobal() {
+        const count = paginationState.global.totalItems;
+        const fileType = count >= 50 ? 'ZIP' : 'CSV';
+        await downloadFile('/admin/badges_extraction/api/export/global', getFilterParams(), 'global', `✅ ${fileType} téléchargé ! (${count} joueurs)`);
+    }
+
+    async function exportZeroFail() {
+        await downloadFile('/admin/badges_extraction/api/export/zero_fail', getFilterParams(), 'zerofail', ' CSV téléchargé !');
+    }
+
+    async function exportTopN() {
+        const params = getFilterParams();
+        params.top_limit = parseInt(document.getElementById('topn-limit').value);
+        if (!params.top_limit || params.top_limit < 1) {
+            showMessage('topn', '❌ Nombre invalide', 'danger');
+            return;
+        }
+        const basisSelect = document.getElementById('topn-basis');
+        params.ranking_basis = basisSelect ? (basisSelect.value || 'general') : 'general';
+        await downloadFile('/admin/badges_extraction/api/export/top_n', params, 'topn', ' ZIP téléchargé !');
+    }
+
+    async function exportNoHint() {
+        await downloadFile('/admin/badges_extraction/api/export/no_hint', getFilterParams(), 'nohint', ' CSV téléchargé !');
+    }
+
+    async function exportSolvedChall() {
+        const challengeId = document.getElementById('solvedchall-select').value;
+        if (!challengeId) {
+            showMessage('solvedchall', '❌ Choisissez un challenge avant d\'exporter', 'danger');
+            return;
+        }
+        const params = getFilterParams();
+        params.challenge_id = challengeId;
+        await downloadFile('/admin/badges_extraction/api/export/challenge_solved', params, 'solvedchall', ' CSV téléchargé !');
+    }
+
+    // Event listeners
+    document.getElementById('domain-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') addDomain();
+    });
+
+    // Init au chargement
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Event listeners boutons statiques
+        document.getElementById('btn-add-domain').addEventListener('click', addDomain);
+        document.getElementById('save-config-btn').addEventListener('click', saveConfigManual);
+        document.getElementById('btn-clear-config').addEventListener('click', clearConfig);
+        document.getElementById('btn-refresh').addEventListener('click', refreshCurrentTab);
+        
+        document.getElementById('btn-export-global').addEventListener('click', exportGlobal);
+        document.getElementById('btn-export-zerofail').addEventListener('click', exportZeroFail);
+        document.getElementById('btn-export-topn').addEventListener('click', exportTopN);
+        document.getElementById('btn-export-nohint').addEventListener('click', exportNoHint);
+        document.getElementById('btn-export-solvedchall').addEventListener('click', exportSolvedChall);
+        document.getElementById('btn-copy-clipboard').addEventListener('click', copyModalToClipboard);
+        
+        // Délégation d'événements pour les éléments dynamiques
+        document.addEventListener('click', function(e) {
+            // Boutons suppression domaine
+            if (e.target.matches('.modern-domain-delete-btn')) {
+                const domain = e.target.dataset.domain;
+                if (domain) {
+                    removeDomain(domain);
+                }
+            }
+            
+            // Boutons pagination
+            if (e.target.matches('.pagination-btn') && !e.target.disabled) {
+                const tabId = e.target.dataset.tabid;
+                const page = parseInt(e.target.dataset.page);
+                if (tabId && page) {
+                    goToPage(tabId, page);
+                }
+            }
+        });
+        
+        // Select pagination
+        document.addEventListener('change', function(e) {
+            if (e.target.matches('.pagination-select')) {
+                const tabId = e.target.dataset.tabid;
+                const newValue = e.target.value;
+                if (tabId && newValue) {
+                    changeItemsPerPage(tabId, newValue);
+                }
+            }
+        });
+        
+        // Event listener sur les onglets pour refresh au clic
+        document.querySelectorAll('#extractionTabs .nav-link').forEach(tabLink => {
+            tabLink.addEventListener('click', function(e) {
+                // Attendre un petit moment que l'onglet soit activé
+                setTimeout(() => {
+                    refreshCurrentTab();
+                }, 100);
+            });
+        });
+        
+        // Chargement initial
+        // Charger d'abord le mode par défaut du CTFd
+        await loadCTFdMode();
+        // Puis charger la config sauvegardée (qui écrase le mode si elle existe)
+        await loadConfig();
+        loadTotalUsers();
+        loadChallenges();
+        loadRankingBases();
+        updateColumnHeaders();
+    });
+</script>
+
+<script>
+/* ===================================================================
+   Badgify i18n — FR / EN. N'affecte QUE l'affichage statique.
+   Le JavaScript fonctionnel du plugin n'est pas touché.
+   =================================================================== */
+(function () {
+    var I18N = {
+        fr: {
+            eyebrow: "Extraction de données · CTFd",
+            tagline: "Plugin utile pour la plateforme Badgify",
+            config: "Configuration",
+            autosave: "Sauvegarde automatique à chaque changement",
+            total_users: "Total utilisateurs",
+            loading: "Chargement...",
+            mode_title: "Mode du CTFd",
+            mode_help: "Détecté automatiquement — modifiable si besoin",
+            back_menu: "\u2190 Retour au menu",
+            goto_badgify: "Se rendre sur Badgify \u2197",
+            mode_users: "Utilisateurs (Users)",
+            mode_teams: "Équipes (Teams)",
+            excluded_domains: "Domaines exclus",
+            domain_ph: "exemple.com",
+            no_domain: "Aucun domaine exclu",
+            filters: "Filtrages",
+            exclude_admins: "Exclure les administrateurs",
+            exclude_hidden: "Exclure les comptes cachés (hidden)",
+            filter_challenge: "Filtre par challenge",
+            filter_challenge_help: "Affichera uniquement les joueurs ayant résolu ce challenge",
+            all_users: "— Tous les challenges —",
+            csv_columns: "Colonnes CSV",
+            csv_columns_help: "Nous vous recommandons de ne pas toucher à cette partie",
+            col_rank: "Rank / Position",
+            save: "Sauvegarder",
+            reset: "Réinitialiser",
+            data_extraction: "Extractions de données",
+            refresh: "Actualiser",
+            tab_global: "Globale",
+            tab_zerofail: "0% Fail",
+            tab_topn: "TOP N",
+            tab_nohint: "No Hint",
+            tab_solved: "Résolu le challenge X",
+            tab_excluded: "Exclus",
+            global_title: "Extraction Globale",
+            results: "résultats",
+            row_refresh: " Cliquez sur <strong>\"Actualiser\"</strong> pour charger les données",
+            row_choose: " Choisissez un challenge puis cliquez sur <strong>\"Actualiser\"</strong>",
+            dl_csv: "Télécharger le CSV",
+            dl_zip: "Télécharger le ZIP",
+            copy_ue: "Copier (username,email)",
+            zerofail_title: "Sans erreur (0% Fail)",
+            info: "Information",
+            zerofail_info: "Afficher les équipes / joueurs ayant 0% de fail durant l'évènement.",
+            col_name: "Nom",
+            col_emails: "Email(s)",
+            topn_info: "Classement final de l'événement. Téléchargez une archive ZIP contenant plusieurs fichiers CSV, un par équipe, avec les informations détaillées de chacune, idéal pour attribuer des badges « TOP 1 », « TOP 2 », etc.",
+            topn_positions: "Nombre de positions à exporter :",
+            topn_basis: "Classement basé sur :",
+            topn_basis_general: "Général (score)",
+            nohint_title: "Sans hints",
+            nohint_info: "Afficher les équipes / joueurs ayant pris aucun hint durant l'évènement.",
+            solved_title: "Résolu le challenge X",
+            solved_info: "Liste des équipes / joueurs ayant résolu le challenge sélectionné ci-dessous — indépendant du filtre challenge global des autres onglets. Pratique par exemple pour exporter qui a terminé tout le CTF en choisissant le dernier challenge d'un parcours.",
+            challenge_label: "Challenge :",
+            choose_challenge: "— Choisir un challenge —",
+            excluded_title: "Utilisateurs exclus",
+            excluded_word: "exclus",
+            excluded_info: "Cette liste affiche les utilisateurs exclus par vos filtres (domaines, admins, hidden, challenge)",
+            col_reason: "Raison",
+            copy: "Copier",
+            copy_clip: "Copier dans le presse-papier",
+            copied: "Copié dans le presse-papier !"
+        },
+        en: {
+            eyebrow: "Data extraction · CTFd",
+            tagline: "A handy plugin for the Badgify platform",
+            config: "Configuration",
+            autosave: "Auto-saved on every change",
+            total_users: "Total users",
+            loading: "Loading...",
+            mode_title: "CTFd mode",
+            mode_help: "Auto-detected — change it if needed",
+            back_menu: "\u2190 Back to menu",
+            goto_badgify: "Go to Badgify \u2197",
+            mode_users: "Users",
+            mode_teams: "Teams",
+            excluded_domains: "Excluded domains",
+            domain_ph: "example.com",
+            no_domain: "No excluded domain",
+            filters: "Filters",
+            exclude_admins: "Exclude administrators",
+            exclude_hidden: "Exclude hidden accounts",
+            filter_challenge: "Filter by challenge",
+            filter_challenge_help: "Will only show players who solved this challenge",
+            all_users: "— All challenges —",
+            csv_columns: "CSV columns",
+            csv_columns_help: "We recommend not changing this section",
+            col_rank: "Rank / Position",
+            save: "Save",
+            reset: "Reset",
+            data_extraction: "Data extraction",
+            refresh: "Refresh",
+            tab_global: "Global",
+            tab_zerofail: "0% Fail",
+            tab_topn: "TOP N",
+            tab_nohint: "No Hint",
+            tab_solved: "Solved challenge X",
+            tab_excluded: "Excluded",
+            global_title: "Global extraction",
+            results: "results",
+            row_refresh: " Click <strong>\"Refresh\"</strong> to load the data",
+            row_choose: " Pick a challenge then click <strong>\"Refresh\"</strong>",
+            dl_csv: "Download CSV",
+            dl_zip: "Download ZIP",
+            copy_ue: "Copy (username,email)",
+            zerofail_title: "No mistakes (0% Fail)",
+            info: "Information",
+            zerofail_info: "Show teams / players with 0% fail during the event.",
+            col_name: "Name",
+            col_emails: "Email(s)",
+            topn_info: "Final event ranking. Download a ZIP archive containing several CSV files, one per team, with detailed info for each — ideal to award “TOP 1”, “TOP 2” badges, etc.",
+            topn_positions: "Number of positions to export:",
+            topn_basis: "Ranking based on:",
+            topn_basis_general: "General (score)",
+            nohint_title: "No hints",
+            nohint_info: "Show teams / players who used no hint during the event.",
+            solved_title: "Solved challenge X",
+            solved_info: "List of teams / players who solved the challenge selected below — independent from the global challenge filter of the other tabs. Handy for example to export who finished the whole CTF by picking the last challenge of a track.",
+            challenge_label: "Challenge:",
+            choose_challenge: "— Choose a challenge —",
+            excluded_title: "Excluded users",
+            excluded_word: "excluded",
+            excluded_info: "This list shows the users excluded by your filters (domains, admins, hidden, challenge)",
+            col_reason: "Reason",
+            copy: "Copy",
+            copy_clip: "Copy to clipboard",
+            copied: "Copied to clipboard!"
+        }
+    };
+
+    var root = document.getElementById('badgify-root');
+    if (!root) return;
+
+    function apply(lang) {
+        var dict = I18N[lang] || I18N.fr;
+        root.querySelectorAll('[data-i18n]').forEach(function (el) {
+            var v = dict[el.getAttribute('data-i18n')];
+            if (v != null) el.textContent = v;
+        });
+        root.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+            var v = dict[el.getAttribute('data-i18n-html')];
+            if (v != null) el.innerHTML = v;
+        });
+        root.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
+            var v = dict[el.getAttribute('data-i18n-ph')];
+            if (v != null) el.setAttribute('placeholder', v);
+        });
+        root.querySelectorAll('.badgify-lang-btn').forEach(function (b) {
+            b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+        });
+        try { localStorage.setItem('badgify_lang', lang); } catch (e) {}
+        window.BADGIFY_LANG = lang;
+    }
+
+    var saved = 'fr';
+    try { saved = localStorage.getItem('badgify_lang') || 'fr'; } catch (e) {}
+
+    root.querySelectorAll('.badgify-lang-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            apply(btn.getAttribute('data-lang'));
+        });
+    });
+
+    apply(saved);
+})();
+</script>
+
+<script>
+/* Hauteur du bloc Configuration alignee sur le bloc de droite + scroll interne.
+   Purement visuel - ne touche pas a la logique du plugin. */
+(function () {
+    var root = document.getElementById('badgify-root');
+    if (!root) return;
+    var left = root.querySelector('.sticky-card');
+    var right = root.querySelector('.col-lg-8 .modern-card');
+    if (!left || !right) return;
+    function sync() {
+        if (window.innerWidth < 992) { left.style.height = ''; return; }
+        left.style.height = right.offsetHeight + 'px';
+    }
+    if (window.ResizeObserver) { try { new ResizeObserver(sync).observe(right); } catch (e) {} }
+    window.addEventListener('resize', sync);
+    window.addEventListener('load', sync);
+    sync();
+    setTimeout(sync, 300);
+    setTimeout(sync, 1000);
+})();
+</script>
+
+<script>
+/* Barre "Attribuer au badge X (via API)" : visible seulement si ?badge=... est
+   present (page /award) ET que l'API Badgify est configuree. Lit les participants
+   filtres de l'onglet actif (paginationState) et appelle /badgify/award. */
+(function () {
+    var params = new URLSearchParams(location.search);
+    var badgeId = params.get("badge");
+    var badgeName = params.get("badge_name") || badgeId;
+    var badgeImg = params.get("badge_img");
+    if (!badgeId) return;
+    ["col-id","col-rank","col-username","col-teamname","col-email","col-score"].forEach(function(cid){ var el=document.getElementById(cid); if(el){ var cc=el.closest(".modern-checkbox-container"); if(cc) cc.style.display="none"; } });
+    (function(){ var ct=document.querySelector('[data-i18n="csv_columns"]'); if(ct){ var sp=ct.previousElementSibling; if(sp&&sp.classList&&sp.classList.contains("section-separator")) sp.style.display="none"; ct.style.display="none"; } var ch=document.querySelector('[data-i18n="csv_columns_help"]'); if(ch) ch.style.display="none"; })();
+    var API = "/admin/badges_extraction/api";
+    function csrf(){ try { return window.init.csrfNonce; } catch(e){ return ""; } }
+    function L(){ try { return localStorage.getItem("badgify_lang") || "fr"; } catch(e){ return "fr"; } }
+    function esc(s){ return String(s==null?"":s).replace(/[&<>]/g, function(m){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[m]; }); }
+
+    fetch(API + "/badgify/config", { credentials:"same-origin" })
+        .then(function(r){ return r.json(); })
+        .then(function(cfg){ if (cfg && cfg.configured) buildBar(); })
+        .catch(function(){});
+
+    function activeTab(){ var p = document.querySelector("#extractionTabContent .tab-pane.active"); return p ? p.id : null; }
+
+    function recipients(tabId){
+        try {
+            var st = (typeof paginationState !== "undefined") ? paginationState[tabId] : null;
+            if (!st || !st.data) return [];
+            var out = [], seen = {};
+            st.data.forEach(function(it){
+                var uname = it.username || it.name || "";
+                var emails = [];
+                if (it.email) emails = [it.email];
+                else if (it.emails) emails = String(it.emails).split(/[,;\s]+/).filter(Boolean);
+                emails.forEach(function(em){ var k = em.toLowerCase(); if (em.indexOf("@") > 0 && !seen[k]){ seen[k] = 1; out.push({ username: uname || em.split("@")[0], email: em }); } });
+            });
+            return out;
+        } catch(e){ return []; }
+    }
+
+    function buildBar(){
+        var fr = (L() !== "en");
+        var label = fr ? "Badge s\u00e9lectionn\u00e9 : " : "Selected badge: ";
+        var btnTxt = fr ? ("Attribuer au badge \u00ab " + badgeName + " \u00bb (via l\u2019API)")
+                        : ("Award to badge \u00ab " + badgeName + " \u00bb (via API)");
+        var bar = document.createElement("div"); bar.className = "bdg-award-bar"; bar.id = "bdg-award-bar";
+        bar.innerHTML =
+            '<div class="aw-info">' + (badgeImg ? '<img class="aw-badge-img" id="aw-badge-img" alt="">' : '<span class="aw-dot"></span>') + '<span>' + label + '<strong>' + esc(badgeName) + '</strong></span></div>' +
+            '<div class="aw-actions"><span class="aw-msg" id="aw-msg"></span>' +
+            '<button class="modern-btn modern-btn-primary modern-btn-sm" id="aw-go">' + esc(btnTxt) + '</button></div>';
+        (document.getElementById("badgify-root") || document.body).appendChild(bar);
+        if (badgeImg){ var bi=document.getElementById("aw-badge-img"); if(bi) bi.setAttribute("src", badgeImg); }
+        document.getElementById("aw-go").addEventListener("click", doAward);
+    }
+
+    function setMsg(txt, kind){ var el = document.getElementById("aw-msg"); if (!el) return; el.textContent = txt; el.className = "aw-msg " + (kind || ""); }
+
+    async function doAward(){
+        var fr = (L() !== "en");
+        var tab = activeTab();
+        if (tab === "excluded"){ setMsg(fr ? "Indisponible sur l\u2019onglet Exclus." : "Not available on the Excluded tab.", "err"); return; }
+        var recs = recipients(tab);
+        if (!recs.length){ setMsg(fr ? "Aucun participant charg\u00e9 \u2014 cliquez d\u2019abord sur Actualiser." : "No participant loaded \u2014 click Refresh first.", "err"); return; }
+        if (!confirm((fr ? "Attribuer ce badge \u00e0 " : "Award this badge to ") + recs.length + (fr ? " participant(s) ?" : " participant(s)?"))) return;
+        var btn = document.getElementById("aw-go"); btn.disabled = true;
+        setMsg(fr ? "Attribution\u2026" : "Awarding\u2026", "info");
+        var awarded = 0, failed = 0, errors = [];
+        try {
+            for (var i = 0; i < recs.length; i += 50){
+                var chunk = recs.slice(i, i + 50);
+                var r = await fetch(API + "/badgify/award", { method:"POST", credentials:"same-origin",
+                    headers:{ "Content-Type":"application/json", "CSRF-Token": csrf() },
+                    body: JSON.stringify({ badge_id: badgeId, recipients: chunk }) });
+                var d = await r.json();
+                if (d.success && d.result){ awarded += (d.result.awarded||0); failed += (d.result.failed||0); if (d.result.errors) errors = errors.concat(d.result.errors); }
+                else { failed += chunk.length; errors.push({ reason: d.error || ("HTTP " + d.status_code) }); }
+            }
+            var kind = failed === 0 ? "ok" : (awarded > 0 ? "info" : "err");
+            var msg = fr ? ("Attribu\u00e9 : " + awarded + "/" + recs.length + " \u2014 \u00c9checs : " + failed)
+                         : ("Awarded: " + awarded + "/" + recs.length + " \u2014 Failed: " + failed);
+            if (errors.length){ msg += " \u00b7 " + errors.slice(0,4).map(function(e){ return e.reason || "?"; }).join(", "); }
+            setMsg(msg, kind);
+        } catch(e){ setMsg(String(e), "err"); }
+        btn.disabled = false;
+    }
+})();
+</script>
+
+{% endblock %}

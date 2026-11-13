@@ -1,0 +1,192 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+    #badgify-root {
+        --bg: #0a0a0f; --surface: #14141b; --surface-2: #1b1b24; --surface-3: #22222d;
+        --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.14);
+        --text: #f4f4f6; --muted: #9a9aa7; --muted-2: #6f6f7d;
+        --primary: #6366f1; --violet: #8b5cf6; --green: #22c55e;
+        --grad: linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
+        --radius: 16px; --radius-sm: 10px;
+        font-family: 'Inter', system-ui, sans-serif; color: var(--text);
+        background:
+            radial-gradient(900px 500px at 12% -10%, rgba(99,102,241,0.18), transparent 60%),
+            radial-gradient(800px 520px at 100% 0%, rgba(139,92,246,0.12), transparent 55%),
+            var(--bg);
+        border: 1px solid var(--border); border-radius: 18px;
+        margin: 1rem auto 0; max-width: 1080px; padding: 0 0 2.5rem; overflow: hidden;
+    }
+    #badgify-root h1,#badgify-root h2,#badgify-root h3 { font-family:'Space Grotesk','Inter',sans-serif; }
+
+    #badgify-root .bdg-head {
+        display:flex; justify-content:space-between; align-items:flex-start; gap:1.5rem;
+        flex-wrap:wrap; padding:2rem 2.25rem 1.75rem; border-bottom:1px solid var(--border);
+        background:linear-gradient(180deg, rgba(99,102,241,0.08), transparent);
+    }
+    #badgify-root .bdg-brand { display:flex; align-items:center; gap:0.6rem; margin-bottom:1rem; }
+    #badgify-root .bdg-logo {
+        width:38px; height:38px; display:grid; place-items:center; overflow:hidden;
+    }
+    #badgify-root .bdg-wordmark { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.15rem; letter-spacing:-0.02em; }
+    #badgify-root .bdg-wordmark .dot { color:var(--green); }
+    #badgify-root .bdg-eyebrow {
+        font-family:'Space Grotesk',sans-serif; font-size:0.72rem; letter-spacing:0.14em;
+        text-transform:uppercase; color:var(--muted-2); display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;
+    }
+    #badgify-root .bdg-eyebrow::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 10px var(--green); }
+    #badgify-root .bdg-head h1 { font-size:1.9rem; font-weight:700; letter-spacing:-0.02em; margin:0 0 0.35rem; }
+    #badgify-root .bdg-head p { margin:0; color:var(--muted); font-size:0.95rem; }
+
+    #badgify-root .bdg-head-actions { display:inline-flex; align-items:center; gap:0.6rem; flex-wrap:wrap; }
+    #badgify-root .bdg-site-btn {
+        display:inline-flex; align-items:center; gap:0.35rem; text-decoration:none;
+        font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.8rem; color:var(--text);
+        background:var(--surface-2); border:1px solid var(--border-strong); padding:7px 12px; border-radius:8px;
+        transition:background .15s, border-color .15s, color .15s;
+    }
+    #badgify-root .bdg-site-btn:hover { background:var(--surface-3); border-color:rgba(99,102,241,0.5); color:#fff; text-decoration:none; }
+    #badgify-root .bdg-sub { font-size:0.82rem; color:var(--muted-2); margin:0 0 1.2rem; line-height:1.5; }
+    #badgify-root .bdg-sub a { color:#c7c9ff; font-weight:600; text-decoration:none; }
+    #badgify-root .bdg-sub a:hover { text-decoration:underline; }
+    #badgify-root .badgify-lang { display:inline-flex; padding:4px; gap:2px; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; }
+    #badgify-root .badgify-lang-btn {
+        border:0; background:transparent; color:var(--muted); font-family:'Space Grotesk',sans-serif;
+        font-weight:600; font-size:0.8rem; padding:6px 14px; border-radius:7px; cursor:pointer; transition:background .15s,color .15s;
+    }
+    #badgify-root .badgify-lang-btn:hover { color:var(--text); }
+    #badgify-root .badgify-lang-btn.active { background:var(--grad); color:#fff; box-shadow:0 4px 14px rgba(99,102,241,0.35); }
+
+    #badgify-root .bdg-grid {
+        display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+        gap:1.5rem; padding:2.25rem 2.25rem 0;
+    }
+    #badgify-root .bdg-choice {
+        display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border);
+        border-radius:var(--radius); padding:1.75rem; transition:border-color .18s, transform .18s, box-shadow .18s;
+        position:relative; overflow:hidden;
+    }
+    #badgify-root .bdg-choice::after {
+        content:''; position:absolute; inset:0 0 auto 0; height:3px; background:var(--grad); opacity:0; transition:opacity .18s;
+    }
+    #badgify-root .bdg-choice:hover { border-color:rgba(99,102,241,0.5); transform:translateY(-3px); box-shadow:0 18px 50px rgba(0,0,0,0.45); }
+    #badgify-root .bdg-choice:hover::after { opacity:1; }
+    #badgify-root .bdg-choice.soon { opacity:0.96; }
+    #badgify-root .bdg-ico {
+        width:52px; height:52px; border-radius:13px; display:grid; place-items:center; margin-bottom:1.1rem;
+        background:rgba(99,102,241,0.14); border:1px solid rgba(99,102,241,0.4); color:#c7c9ff;
+    }
+    #badgify-root .bdg-choice h2 { font-size:1.2rem; font-weight:700; margin:0 0 0.5rem; display:flex; align-items:center; gap:0.6rem; }
+    #badgify-root .bdg-choice p { color:var(--muted); font-size:0.92rem; line-height:1.5; margin:0 0 1.5rem; flex:1; }
+    #badgify-root .bdg-pill {
+        font-family:'Space Grotesk',sans-serif; font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase;
+        padding:0.2rem 0.5rem; border-radius:999px; background:rgba(245,158,11,0.15);
+        border:1px solid rgba(245,158,11,0.45); color:#fcd34d;
+    }
+    #badgify-root .bdg-cta {
+        display:inline-flex; align-items:center; justify-content:center; gap:0.5rem;
+        font-family:'Inter',sans-serif; font-weight:600; font-size:0.92rem; text-decoration:none;
+        padding:0.7rem 1.1rem; border-radius:var(--radius-sm); border:1px solid transparent; cursor:pointer;
+        background:#4f46e5; color:#fff; transition:background .15s, transform .08s;
+    }
+    #badgify-root .bdg-cta:hover { background:#4338ca; transform:translateY(-1px); color:#fff; text-decoration:none; }
+    #badgify-root .bdg-cta.ghost { background:transparent; border-color:var(--border-strong); color:var(--muted); }
+    #badgify-root .bdg-cta.ghost:hover { background:var(--surface-2); transform:translateY(-1px); color:var(--text); }
+
+    @media (max-width:640px){ #badgify-root .bdg-head,#badgify-root .bdg-grid { padding-left:1.1rem; padding-right:1.1rem; } }
+</style>
+
+<div id="badgify-root">
+    <div class="bdg-head">
+        <div>
+            <div class="bdg-brand">
+                <span class="bdg-logo" aria-hidden="true">
+                    <img src="{{ logo_url }}" alt="" style="width:100%;height:100%;object-fit:contain;">
+                </span>
+                <span class="bdg-wordmark">badgify<span class="dot">.</span></span>
+            </div>
+            <div class="bdg-eyebrow">Badges Data Extraction</div>
+            <h1 data-i18n="menu_title">Comment voulez-vous exporter ?</h1>
+            <p data-i18n="menu_sub">Choisissez le mode d'export des données de vos participants.</p>
+        </div>
+        <div class="bdg-head-actions">
+            <a href="https://badgify.eu/" target="_blank" rel="noopener" class="bdg-site-btn" data-i18n="goto_badgify">Se rendre sur Badgify ↗</a>
+            <div class="badgify-lang" role="group" aria-label="Langue / Language">
+                <button type="button" class="badgify-lang-btn active" data-lang="fr">FR</button>
+                <button type="button" class="badgify-lang-btn" data-lang="en">EN</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bdg-grid">
+        <!-- Export à la main -->
+        <div class="bdg-choice">
+            <span class="bdg-ico" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v11"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+            </span>
+            <h2 data-i18n="manual_title">Export à la main</h2>
+            <p data-i18n="manual_desc">Parcourez, filtrez et téléchargez vous-même les données (CSV, ZIP, copier-coller). C'est la page actuelle, complète et prête à l'emploi.</p>
+            <a href="/admin/badges_extraction/manual" class="bdg-cta" data-i18n="manual_cta">Ouvrir l'export manuel</a>
+        </div>
+
+        <!-- Export API Badgify -->
+        <div class="bdg-choice">
+            <span class="bdg-ico" aria-hidden="true">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6M15 2v6"/><rect x="5" y="8" width="14" height="6" rx="2"/><path d="M12 14v4a3 3 0 0 0 3 3h1"/></svg>
+            </span>
+            <h2 data-i18n="api_title">Export API Badgify</h2>
+            <p data-i18n="api_desc">Attribuez les badges automatiquement à vos participants via l'API Badgify, sans export manuel.</p>
+            <p class="bdg-sub"><a href="https://badgify.eu/org/api" target="_blank" rel="noopener" data-i18n="gen_token">Générer son token API ↗</a><br><span data-i18n="org_rights">Votre organisation doit avoir les droits en amont d'utiliser l'API.</span></p>
+            <a href="/admin/badges_extraction/badgify" class="bdg-cta" data-i18n="api_cta">Configurer l'API</a>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var I = {
+        fr: {
+            menu_title: "Comment voulez-vous exporter ?",
+            menu_sub: "Choisissez le mode d'export des données de vos participants.",
+            manual_title: "Export à la main",
+            manual_desc: "Parcourez, filtrez et téléchargez vous-même les données (CSV, ZIP, copier-coller). C'est la page actuelle, complète et prête à l'emploi.",
+            manual_cta: "Ouvrir l'export manuel",
+            api_title: "Export API Badgify",
+            soon: "Bientôt",
+            api_desc: "Attribuez les badges automatiquement à vos participants via l'API Badgify, sans export manuel.",
+            api_cta: "Configurer l'API",
+            gen_token: "Générer son token API ↗",
+            org_rights: "Votre organisation doit avoir les droits en amont d'utiliser l'API.",
+            goto_badgify: "Se rendre sur Badgify ↗"
+        },
+        en: {
+            menu_title: "How do you want to export?",
+            menu_sub: "Choose how to export your participants' data.",
+            manual_title: "Manual export",
+            manual_desc: "Browse, filter and download the data yourself (CSV, ZIP, copy-paste). This is the current page, complete and ready to use.",
+            manual_cta: "Open manual export",
+            api_title: "Badgify API export",
+            soon: "Soon",
+            api_desc: "Automatically award badges to your participants through the Badgify API, with no manual export.",
+            api_cta: "Configure the API",
+            gen_token: "Generate your API token ↗",
+            org_rights: "Your organisation must have the rights to use the API beforehand.",
+            goto_badgify: "Go to Badgify ↗"
+        }
+    };
+    var root = document.getElementById('badgify-root'); if (!root) return;
+    function apply(lang){
+        var d = I[lang] || I.fr;
+        root.querySelectorAll('[data-i18n]').forEach(function(el){ var v=d[el.getAttribute('data-i18n')]; if(v!=null) el.textContent=v; });
+        root.querySelectorAll('.badgify-lang-btn').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-lang')===lang); });
+        try{ localStorage.setItem('badgify_lang', lang); }catch(e){}
+    }
+    var saved='fr'; try{ saved=localStorage.getItem('badgify_lang')||'fr'; }catch(e){}
+    root.querySelectorAll('.badgify-lang-btn').forEach(function(btn){ btn.addEventListener('click', function(){ apply(btn.getAttribute('data-lang')); }); });
+    apply(saved);
+})();
+</script>
+
+{% endblock %}
