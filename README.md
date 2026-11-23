@@ -81,6 +81,8 @@ Open it from the CTFd admin panel at: **`/admin/badges_extraction`**
 - Per-user config is scoped to the **session user id** (no IDOR); exports are generated **in memory** (no filesystem path traversal).
 - User- and API-supplied data is **HTML-escaped** before rendering (no stored/reflected XSS).
 - The **Badgify token lives only in the backend database** and is never exposed in any API response or in the UI.
+- **CSV / spreadsheet exports are hardened against formula injection** ([OWASP CSV Injection](https://owasp.org/www-community/attacks/CSV_Injection)): every cell beginning with `=`, `+`, `-`, `@`, tab or carriage-return is neutralized across all exports.
+- The `badge_id` sent to the Badgify award endpoint is **validated against a strict charset** before use.
 
 ---
 
@@ -94,4 +96,5 @@ Open it from the CTFd admin panel at: **`/admin/badges_extraction`**
 
 - Author: **Hack'olyte** — <https://github.com/HACK-OLYTE>
 - Badge platform: **Badgify** — <https://badgify.eu>
+- Security: big thanks to **[@PercevalFox](https://github.com/PercevalFox)** for responsibly reporting the CSV formula-injection vulnerability ([issue #1](https://github.com/HACK-OLYTE/ctfd-badgify-extractor/issues/1)) — now fixed. 🙏
 - Released under the MIT License.

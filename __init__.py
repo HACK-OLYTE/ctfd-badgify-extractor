@@ -47,6 +47,32 @@ class BadgifyConfig(db.Model):
     updated_at = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
 
 
+def _csv_safe(value):
+    """Neutralise l'injection de formules CSV (OWASP CSV Injection) : prefixe
+    une apostrophe aux cellules TEXTE commencant par un caractere interprete
+    comme une formule par les tableurs (Excel, LibreOffice, Google Sheets)."""
+    if isinstance(value, str) and value and value[0] in ('=', '+', '-', '@', '\t', '\r', '\n'):
+        return "'" + value
+    return value
+
+
+class _SafeCsvWriter:
+    """Enveloppe csv.writer et neutralise chaque cellule (anti CSV injection)."""
+    def __init__(self, writer):
+        self._w = writer
+
+    def writerow(self, row):
+        self._w.writerow([_csv_safe(c) for c in row])
+
+    def writerows(self, rows):
+        for r in rows:
+            self.writerow(r)
+
+
+def _safe_writer(fileobj):
+    return _SafeCsvWriter(csv.writer(fileobj))
+
+
 def _badgify_token_hint(token):
     if not token:
         return None
@@ -1100,7 +1126,7 @@ def load(app):
             # Si moins de 50 utilisateurs : CSV simple
             if total_users <= 50:
                 output = io.StringIO()
-                writer = csv.writer(output)
+                writer = _safe_writer(output)
                 
                 # Header dynamique
                 writer.writerow(build_csv_row(columns, 'header_user', None))
@@ -1136,7 +1162,7 @@ def load(app):
                         batch_users = filtered_users[batch_index:batch_index + batch_size]
                         
                         csv_output = io.StringIO()
-                        writer = csv.writer(csv_output)
+                        writer = _safe_writer(csv_output)
                         
                         # Header
                         writer.writerow(build_csv_row(columns, 'header_user', None))
@@ -1193,7 +1219,7 @@ def load(app):
             })
             
             output = io.StringIO()
-            writer = csv.writer(output)
+            writer = _safe_writer(output)
             
             if mode == 'teams':
                 writer.writerow(build_csv_row(columns, 'header_team', None))
@@ -1343,7 +1369,7 @@ def load(app):
                         added_teams += 1
 
                         csv_output = io.StringIO()
-                        writer = csv.writer(csv_output)
+                        writer = _safe_writer(csv_output)
                         writer.writerow(build_csv_row(columns, 'header_top_team', None))
 
                         # Ajouter tous les membres valides
@@ -1404,7 +1430,7 @@ def load(app):
                         added_users += 1
 
                         csv_output = io.StringIO()
-                        writer = csv.writer(csv_output)
+                        writer = _safe_writer(csv_output)
                         writer.writerow(build_csv_row(columns, 'header_top_user', None))
                         writer.writerow(build_csv_row(columns, 'top_user', {
                             'rank': added_users,
@@ -1525,7 +1551,7 @@ def load(app):
             challenge_name = challenge.name if challenge else str(challenge_id)
 
             output = io.StringIO()
-            writer = csv.writer(output)
+            writer = _safe_writer(output)
 
             if mode == 'teams':
                 writer.writerow(build_csv_row(columns, 'header_team', None))
@@ -1605,7 +1631,7 @@ def load(app):
             })
             
             output = io.StringIO()
-            writer = csv.writer(output)
+            writer = _safe_writer(output)
             
             if mode == 'teams':
                 writer.writerow(build_csv_row(columns, 'header_team', None))
@@ -1801,6 +1827,10 @@ def load(app):
         recipients = data.get('recipients') or []
         if not badge_id:
             return jsonify({'success': False, 'error': 'badge_id requis'}), 422
+        # Durcissement : badge_id injecte dans l'URL proxy -> charset strict (anti path-injection / SSRF)
+        import re as _re
+        if not _re.match(r'^[A-Za-z0-9_-]{1,128}$', badge_id):
+            return jsonify({'success': False, 'error': 'badge_id invalide'}), 422
         if not recipients:
             return jsonify({'success': False, 'error': 'Aucun destinataire'}), 422
         if len(recipients) > 50:
